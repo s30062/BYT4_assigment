@@ -34,7 +34,10 @@ class PersistenceTest {
     void testPurchaseExtentSaveLoad() throws Exception {
         Purchase p = new Purchase(500, 1);
         Purchase.saveExtent();
+
         Purchase.clearExtent();
+
+
         Purchase.loadExtent();
         assertFalse(Purchase.getExtent().isEmpty());
     }
