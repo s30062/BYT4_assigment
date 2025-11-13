@@ -1,5 +1,6 @@
 package com.byt.s30062.model;
 
+import com.byt.s30062.util.ExtentManager;
 
 import java.io.*;
 import java.time.LocalDateTime;
@@ -34,16 +35,13 @@ public class Report implements Serializable {
     public String getContent() { return content; }
 
     public static List<Report> getExtent() { return extent; }
+
     public static void saveExtent() throws IOException {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(EXTENT_FILE))) {
-            out.writeObject(extent);
-        }
+        ExtentManager.saveExtent(extent, EXTENT_FILE);
     }
-    @SuppressWarnings("unchecked")
+
     public static void loadExtent() throws IOException, ClassNotFoundException {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(EXTENT_FILE))) {
-            extent = (List<Report>) in.readObject();
-        }
+        extent = ExtentManager.loadExtent(EXTENT_FILE);
     }
     public static void clearExtent() { extent.clear(); }
 

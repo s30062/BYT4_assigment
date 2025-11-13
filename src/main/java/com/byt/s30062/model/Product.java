@@ -1,5 +1,7 @@
 package com.byt.s30062.model;
 
+import com.byt.s30062.util.ExtentManager;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,16 +54,11 @@ public class Product implements Serializable {
     public static List<Product> getExtent() { return extent; }
 
     public static void saveExtent() throws IOException {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(EXTENT_FILE))) {
-            out.writeObject(extent);
-        }
+        ExtentManager.saveExtent(extent, EXTENT_FILE);
     }
 
-    @SuppressWarnings("unchecked")
     public static void loadExtent() throws IOException, ClassNotFoundException {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(EXTENT_FILE))) {
-            extent = (List<Product>) in.readObject();
-        }
+        extent = ExtentManager.loadExtent(EXTENT_FILE);
     }
 
     //  tests cleanup
