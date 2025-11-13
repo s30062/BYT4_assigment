@@ -2,8 +2,8 @@ package com.byt.s30062;
 
 
 
-import com.byt.s30062.Manager;
-import com.byt.s30062.Staff;
+import com.byt.s30062.model.Manager;
+import com.byt.s30062.model.Staff;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

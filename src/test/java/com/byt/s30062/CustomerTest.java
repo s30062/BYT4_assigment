@@ -1,9 +1,9 @@
 package com.byt.s30062;
 
 
-import com.byt.s30062.Address;
+import com.byt.s30062.model.Address;
 
-import com.byt.s30062.Customer;
+import com.byt.s30062.model.Customer;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.junit.jupiter.api.Test;

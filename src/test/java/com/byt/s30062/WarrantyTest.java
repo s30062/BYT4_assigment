@@ -1,7 +1,7 @@
 package com.byt.s30062;
 
 
-import com.byt.s30062.Warranty;
+import com.byt.s30062.model.Warranty;
 import org.junit.jupiter.api.BeforeEach;
 
 import org.junit.jupiter.api.Test;

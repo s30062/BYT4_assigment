@@ -1,6 +1,4 @@
-package com.byt.s30062;
-
-import com.byt.s30062.Address;
+package com.byt.s30062.model;
 
 import java.io.*;
 import java.time.LocalDate;

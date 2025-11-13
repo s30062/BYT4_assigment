@@ -1,7 +1,7 @@
 package com.byt.s30062;
 
 
-import com.byt.s30062.Product;
+import com.byt.s30062.model.Product;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;

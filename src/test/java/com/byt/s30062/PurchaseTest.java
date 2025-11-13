@@ -2,8 +2,8 @@ package com.byt.s30062;
 
 
 
-import com.byt.s30062.Product;
-import com.byt.s30062.Purchase;
+import com.byt.s30062.model.Product;
+import com.byt.s30062.model.Purchase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
