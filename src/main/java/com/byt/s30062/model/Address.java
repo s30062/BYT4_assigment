@@ -11,14 +11,26 @@ public class Address implements Serializable {
     private String country;
 
     public Address(String street, String city, String postalCode, String country) {
-        if (street == null || street.isBlank()) throw new IllegalArgumentException("Street required");
-        if (city == null || city.isBlank()) throw new IllegalArgumentException("City required");
-        if (postalCode == null || postalCode.isBlank()) throw new IllegalArgumentException("Postal code required");
-        if (country == null || country.isBlank()) throw new IllegalArgumentException("Country required");
-        this.street = street;
-        this.city = city;
-        this.postalCode = postalCode;
-        this.country = country;
+        if (street == null) throw new IllegalArgumentException("street cannot be null");
+        if (street.isBlank()) throw new IllegalArgumentException("street cannot be empty or blank");
+        if (street.length() > 100) throw new IllegalArgumentException("street cannot exceed 100 characters");
+        
+        if (city == null) throw new IllegalArgumentException("city cannot be null");
+        if (city.isBlank()) throw new IllegalArgumentException("city cannot be empty or blank");
+        if (city.length() > 50) throw new IllegalArgumentException("city cannot exceed 50 characters");
+        
+        if (postalCode == null) throw new IllegalArgumentException("postal code cannot be null");
+        if (postalCode.isBlank()) throw new IllegalArgumentException("postal code cannot be empty or blank");
+        if (postalCode.length() > 20) throw new IllegalArgumentException("postal code cannot exceed 20 characters");
+        
+        if (country == null) throw new IllegalArgumentException("country cannot be null");
+        if (country.isBlank()) throw new IllegalArgumentException("country cannot be empty or blank");
+        if (country.length() > 50) throw new IllegalArgumentException("country cannot exceed 50 characters");
+        
+        this.street = street.trim();
+        this.city = city.trim();
+        this.postalCode = postalCode.trim();
+        this.country = country.trim();
     }
 
 

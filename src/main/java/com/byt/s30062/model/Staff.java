@@ -13,80 +13,64 @@ public class Staff implements Serializable {
     private static final long serialVersionUID = 1L;
     private static List<Staff> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "staff_extent.ser";
-    private static int totalEmployees = 0; // static attribute
 
-    private final int staffId;
     private final String firstName;
     private final String lastName;
-    private final LocalDate hireDate;
     private final double baseSalary;
     private boolean isIntern;
 
-    public Staff(int staffId, String firstName, String lastName, LocalDate hireDate, double baseSalary, boolean isIntern) {
-        if (staffId <= 0) throw new IllegalArgumentException("staffId positive");
-        if (firstName == null || firstName.isBlank()) throw new IllegalArgumentException("firstName required");
-        if (lastName == null || lastName.isBlank()) throw new IllegalArgumentException("lastName required");
-        if (hireDate == null || hireDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("invalid hire date");
+    public Staff(String firstName, String lastName, double baseSalary, boolean isIntern) {
+        if (firstName == null) throw new IllegalArgumentException("firstName cannot be null");
+        if (firstName.isBlank()) throw new IllegalArgumentException("firstName cannot be empty or blank");
+        if (firstName.length() > 50) throw new IllegalArgumentException("firstName cannot exceed 50 characters");
+        if (lastName == null) throw new IllegalArgumentException("lastName cannot be null");
+        if (lastName.isBlank()) throw new IllegalArgumentException("lastName cannot be empty or blank");
+        if (lastName.length() > 50) throw new IllegalArgumentException("lastName cannot exceed 50 characters");
         if (baseSalary < 0) throw new IllegalArgumentException("baseSalary cannot be negative");
-        this.staffId = staffId;
+        if (Double.isNaN(baseSalary)) throw new IllegalArgumentException("baseSalary cannot be NaN");
+        if (Double.isInfinite(baseSalary)) throw new IllegalArgumentException("baseSalary cannot be infinite");
+        if (baseSalary > 10_000_000) throw new IllegalArgumentException("baseSalary cannot exceed 10,000,000");
 
-        this.firstName = firstName;
-        this.lastName = lastName;
-
-        this.hireDate = hireDate;
+        this.firstName = firstName.trim();
+        this.lastName = lastName.trim();
         this.baseSalary = baseSalary;
         this.isIntern = isIntern;
         extent.add(this);
-        totalEmployees++;
     }
 
-    public int getStaffId() { return staffId; }
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
-    public LocalDate getHireDate() { return hireDate; }
     public boolean isIntern() { return isIntern; }
- //derived attribure
-    public int getYearsWorked() {
-        return Period.between(hireDate, LocalDate.now()).getYears();
+
+    public double getBaseSalary() {
+        return baseSalary;
     }
 
-    // derived computed salary
-    public double getCurrentSalary() {
-        double multiplier = 1 + 0.02 * getYearsWorked();
-        return Math.round(baseSalary * multiplier * 100.0) / 100.0;
+    public void setIntern(boolean intern) {
+        isIntern = intern;
     }
 
-    public static int getTotalEmployees() { return totalEmployees; }
+    public static List<Staff> getExtent() { return new ArrayList<>(extent); }
 
-
-    public static List<Staff> getExtent() { return extent; }
     public static void saveExtent() throws IOException {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(EXTENT_FILE))) {
-            out.writeObject(extent);
-            out.writeInt(totalEmployees);
-        }
+        ExtentManager.saveExtent(extent, EXTENT_FILE);
     }
 
-    @SuppressWarnings("unchecked")
     public static void loadExtent() throws IOException, ClassNotFoundException {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(EXTENT_FILE))) {
-            extent = (List<Staff>) in.readObject();
-            try { totalEmployees = in.readInt(); } catch (EOFException e) { /*ignore*/ }
-        }
+        extent = ExtentManager.loadExtent(EXTENT_FILE);
     }
-
-    public static void clearExtent() { extent.clear(); totalEmployees = 0; }
+    static void clearExtent() { extent.clear(); }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Staff)) return false;
         Staff s = (Staff) o;
-        return staffId == s.staffId;
+        return firstName.equals(s.firstName) && lastName.equals(s.lastName) && baseSalary == s.getBaseSalary();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(staffId);
+        return Objects.hash(firstName, lastName, baseSalary);
     }
 }

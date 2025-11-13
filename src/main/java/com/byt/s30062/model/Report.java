@@ -13,28 +13,27 @@ public class Report implements Serializable {
     private static List<Report> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "report_extent.ser";
 
-    private final int reportId;
-    private final int managerId;
-    private final LocalDateTime generatedAt;
+    private final Manager manager;
+    private final LocalDateTime dateGenerated;
     private final String content;
 
-    public Report(int reportId, int managerId, String content) {
-        if (reportId <= 0) throw new IllegalArgumentException("reportId positive");
-        if (managerId <= 0) throw new IllegalArgumentException("managerId positive");
-        if (content == null) throw new IllegalArgumentException("content required");
-        this.reportId = reportId;
-        this.managerId = managerId;
-        this.content = content;
-        this.generatedAt = LocalDateTime.now();
+    public Report(Manager manager, String content) {
+        if (manager == null) throw new IllegalArgumentException("manager cannot be null");
+        if (content == null) throw new IllegalArgumentException("content cannot be null");
+        if (content.isBlank()) throw new IllegalArgumentException("content cannot be empty or blank");
+        if (content.length() < 10) throw new IllegalArgumentException("content must be at least 10 characters");
+        if (content.length() > 10000) throw new IllegalArgumentException("content cannot exceed 10000 characters");
+        
+        this.manager = manager;
+        this.content = content.trim();
+        this.dateGenerated = LocalDateTime.now();
         extent.add(this);
     }
 
-    public int getReportId() { return reportId; }
-    public int getManagerId() { return managerId; }
-    public LocalDateTime getGeneratedAt() { return generatedAt; }
+    public LocalDateTime getDateGenerated() { return dateGenerated; }
     public String getContent() { return content; }
 
-    public static List<Report> getExtent() { return extent; }
+    public static List<Report> getExtent() { return new ArrayList<>(extent); }
 
     public static void saveExtent() throws IOException {
         ExtentManager.saveExtent(extent, EXTENT_FILE);
@@ -43,18 +42,18 @@ public class Report implements Serializable {
     public static void loadExtent() throws IOException, ClassNotFoundException {
         extent = ExtentManager.loadExtent(EXTENT_FILE);
     }
-    public static void clearExtent() { extent.clear(); }
+    static void clearExtent() { extent.clear(); }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Report)) return false;
         Report r = (Report) o;
-        return reportId == r.reportId;
+        return manager.equals(r.manager) && dateGenerated.equals(r.getDateGenerated());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reportId);
+        return Objects.hash(manager, dateGenerated);
     }
 }

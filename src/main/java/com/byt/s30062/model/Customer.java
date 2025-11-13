@@ -13,41 +13,49 @@ public class Customer implements Serializable {
     private static List<Customer> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "customer_extent.ser";
 
-    private final int id;
     private final String firstName;
     private final String lastName;
     private final LocalDate birthDate; // complex attr
     private final LocalDate registrationDate; // basic
-    private Address address; // optional complex
 
-    public Customer(int id, String firstName, String lastName, LocalDate birthDate, LocalDate registrationDate) {
-        if (id <= 0) throw new IllegalArgumentException("id must be positive");
-        if (firstName == null || firstName.isBlank()) throw new IllegalArgumentException("firstName required");
-        if (lastName == null || lastName.isBlank()) throw new IllegalArgumentException("lastName required");
-        if (birthDate == null || birthDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("invalid birth date");
-        if (registrationDate == null || registrationDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("invalid registration date");
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public Customer(String firstName, String lastName, LocalDate birthDate, LocalDate registrationDate) {
+        if (firstName == null) throw new IllegalArgumentException("firstName cannot be null");
+        if (firstName.isBlank()) throw new IllegalArgumentException("firstName cannot be empty or blank");
+        if (firstName.length() > 50) throw new IllegalArgumentException("firstName cannot exceed 50 characters");
+        if (lastName == null) throw new IllegalArgumentException("lastName cannot be null");
+        if (lastName.isBlank()) throw new IllegalArgumentException("lastName cannot be empty or blank");
+        if (lastName.length() > 50) throw new IllegalArgumentException("lastName cannot exceed 50 characters");
+        if (birthDate == null) throw new IllegalArgumentException("birth date cannot be null");
+        if (birthDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("birth date cannot be in the future");
+        if (birthDate.isBefore(LocalDate.of(1900, 1, 1))) throw new IllegalArgumentException("birth date cannot be before 1900");
+        if (registrationDate == null) throw new IllegalArgumentException("registration date cannot be null");
+        if (registrationDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("registration date cannot be in the future");
+        if (registrationDate.isBefore(birthDate)) throw new IllegalArgumentException("registration date cannot be before birth date");
+        
+        int age = LocalDate.now().getYear() - birthDate.getYear();
+        if (age < 13) throw new IllegalArgumentException("customer must be at least 13 years old");
+        
+        this.firstName = firstName.trim();
+        this.lastName = lastName.trim();
         this.birthDate = birthDate;
         this.registrationDate = registrationDate;
         extent.add(this);
     }
 
-    public void setAddress(Address address) {
-        this.address = address;
+
+    public int getAge(){
+        return LocalDate.now().getYear()-birthDate.getYear();
     }
 
-
-    public int getId() { return id; }
     public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
     public LocalDate getBirthDate() { return birthDate; }
     public LocalDate getRegistrationDate() { return registrationDate; }
-    public Address getAddress() { return address; }
 
+    public String getLastName() {
+        return lastName;
+    }
 
-    public static List<Customer> getExtent() { return extent; }
+    public static List<Customer> getExtent() { return new ArrayList<>(extent); }
 
     public static void saveExtent() throws IOException {
         ExtentManager.saveExtent(extent, EXTENT_FILE);
@@ -57,18 +65,18 @@ public class Customer implements Serializable {
         extent = ExtentManager.loadExtent(EXTENT_FILE);
     }
 
-    public static void clearExtent() { extent.clear(); }
+    static void clearExtent() { extent.clear(); }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Customer)) return false;
         Customer c = (Customer) o;
-        return id == c.id && firstName.equals(c.firstName) && lastName.equals(c.lastName);
+        return firstName.equals(c.firstName) && lastName.equals(c.lastName) && birthDate.isEqual(c.getBirthDate());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName);
+        return Objects.hash(firstName, lastName, birthDate);
     }
 }

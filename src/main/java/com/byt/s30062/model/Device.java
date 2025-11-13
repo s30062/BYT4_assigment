@@ -1,24 +1,63 @@
 package com.byt.s30062.model;
 
 
+import com.byt.s30062.model.enums.Line;
+import com.byt.s30062.model.enums.PortType;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Device extends Product {
-    private String model;
-    private Integer storageGB;
-    private String color; // optional element
+    private Line line;
+    List<PortType> ports = new ArrayList<>();
+    private LocalDate releaseDate;
 
-    public Device(int id, String name, double price, String model, Integer storageGB) {
-        super(id, name, price);
-        if (model == null || model.isBlank()) throw new IllegalArgumentException("model required");
-        if (storageGB != null && storageGB <= 0) throw new IllegalArgumentException("storage must be positive");
-        this.model = model;
-        this.storageGB = storageGB;
+
+    public Device(Line line, List<PortType> ports, LocalDate releaseDate, String name, String color, double initialPrice) {
+        super(name, color, initialPrice);
+        if (line == null) throw new IllegalArgumentException("line cannot be null");
+        if (ports == null) throw new IllegalArgumentException("ports list cannot be null");
+        if (ports.isEmpty()) throw new IllegalArgumentException("device must have at least one port");
+        if (ports.contains(null)) throw new IllegalArgumentException("ports list cannot contain null values");
+        if (releaseDate == null) throw new IllegalArgumentException("release date cannot be null");
+        if (releaseDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("release date cannot be in the future");
+        if (releaseDate.isBefore(LocalDate.of(1970, 1, 1))) throw new IllegalArgumentException("release date cannot be before 1970");
+        
+        this.line = line;
+        this.ports = new ArrayList<>(ports); // defensive copy
+        this.releaseDate = releaseDate;
     }
 
-    public void setColor(String color) {
-        this.color = (color == null || color.isBlank()) ? null : color;
+    public Line getLine() {
+        return line;
     }
 
-    public String getModel() { return model; }
-    public Integer getStorageGB() { return storageGB; }
-    public String getColor() { return color; }
+    public void setLine(Line line) {
+        if (line == null) throw new IllegalArgumentException("line cannot be null");
+        this.line = line;
+    }
+
+    public List<PortType> getPorts() {
+        return new ArrayList<>(ports); // defensive copy
+    }
+
+    public void setPorts(List<PortType> ports) {
+        if (ports == null) throw new IllegalArgumentException("ports list cannot be null");
+        if (ports.isEmpty()) throw new IllegalArgumentException("device must have at least one port");
+        if (ports.contains(null)) throw new IllegalArgumentException("ports list cannot contain null values");
+        this.ports = new ArrayList<>(ports); // defensive copy
+    }
+
+    public LocalDate getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(LocalDate releaseDate) {
+        if (releaseDate == null) throw new IllegalArgumentException("release date cannot be null");
+        if (releaseDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("release date cannot be in the future");
+        if (releaseDate.isBefore(LocalDate.of(1970, 1, 1))) throw new IllegalArgumentException("release date cannot be before 1970");
+        this.releaseDate = releaseDate;
+    }
+
 }
