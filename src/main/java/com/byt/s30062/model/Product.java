@@ -36,8 +36,10 @@ public class Product implements Serializable {
 
     public String getName() { return name; }
 
-    // temporary decision
-    public double getCurrentPrice() { return priceHistory.getLast(); }
+    // temporary decision - derived attribute
+    public double getCurrentPrice() { 
+        return priceHistory.get(priceHistory.size() - 1); 
+    }
 
 
     public List<Double> getPriceHistory() { return new ArrayList<>(priceHistory); }
@@ -61,8 +63,8 @@ public class Product implements Serializable {
         extent = ExtentManager.loadExtent(EXTENT_FILE);
     }
 
-    //  tests cleanup
-    static void clearExtent() { extent.clear(); }
+    // For testing purposes only - clears extent
+    public static void clearExtent() { extent.clear(); }
 
     @Override
     public boolean equals(Object o) {

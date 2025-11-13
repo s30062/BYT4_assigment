@@ -65,7 +65,8 @@ public class Customer implements Serializable {
         extent = ExtentManager.loadExtent(EXTENT_FILE);
     }
 
-    static void clearExtent() { extent.clear(); }
+    // For testing purposes only - clears extent
+    public static void clearExtent() { extent.clear(); }
 
     @Override
     public boolean equals(Object o) {
