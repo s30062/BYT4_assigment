@@ -14,9 +14,9 @@ public class Staff implements Serializable {
     private static List<Staff> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "staff_extent.ser";
 
-    private final String firstName;
-    private final String lastName;
-    private final double baseSalary;
+    private String firstName;
+    private String lastName;
+    private double baseSalary;
     private boolean isIntern;
 
     public Staff(String firstName, String lastName, double baseSalary, boolean isIntern) {
@@ -41,6 +41,18 @@ public class Staff implements Serializable {
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
     public boolean isIntern() { return isIntern; }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setBaseSalary(double baseSalary) {
+        this.baseSalary = baseSalary;
+    }
 
     public double getBaseSalary() {
         return baseSalary;

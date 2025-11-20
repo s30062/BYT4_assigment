@@ -13,10 +13,18 @@ public class Customer implements Serializable {
     private static List<Customer> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "customer_extent.ser";
 
-    private final String firstName;
-    private final String lastName;
+    private String firstName;
+    private String lastName;
     private final LocalDate birthDate; // complex attr
     private final LocalDate registrationDate; // basic
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
     public Customer(String firstName, String lastName, LocalDate birthDate, LocalDate registrationDate) {
         if (firstName == null) throw new IllegalArgumentException("firstName cannot be null");
@@ -54,6 +62,8 @@ public class Customer implements Serializable {
     public String getLastName() {
         return lastName;
     }
+
+
 
     public static List<Customer> getExtent() { return new ArrayList<>(extent); }
 

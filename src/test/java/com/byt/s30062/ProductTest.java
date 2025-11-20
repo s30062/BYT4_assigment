@@ -91,22 +91,6 @@ class ProductTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when color is null")
-    void testColorNull() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> new Product("iPhone", null, 100.0));
-        assertEquals("color cannot be null", ex.getMessage());
-    }
-
-    @Test
-    @DisplayName("Should throw exception when color is blank")
-    void testColorBlank() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> new Product("iPhone", "", 100.0));
-        assertEquals("color cannot be empty or blank", ex.getMessage());
-    }
-
-    @Test
     @DisplayName("Should throw exception when initial price is zero")
     void testPriceZero() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,

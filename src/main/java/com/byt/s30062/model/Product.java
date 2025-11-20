@@ -22,14 +22,14 @@ public class Product implements Serializable {
         if (name == null) throw new IllegalArgumentException("name cannot be null");
         if (name.isBlank()) throw new IllegalArgumentException("name cannot be empty or blank");
         if (name.length() > 100) throw new IllegalArgumentException("name cannot exceed 100 characters");
-        if (color == null) throw new IllegalArgumentException("color cannot be null");
-        if (color.isBlank()) throw new IllegalArgumentException("color cannot be empty or blank");
+//        if (color == null) throw new IllegalArgumentException("color cannot be null");
+//        if (color.isBlank()) throw new IllegalArgumentException("color cannot be empty or blank");
         if (initialPrice <= 0) throw new IllegalArgumentException("initial price must be positive");
         if (Double.isNaN(initialPrice)) throw new IllegalArgumentException("initial price cannot be NaN");
         if (Double.isInfinite(initialPrice)) throw new IllegalArgumentException("initial price cannot be infinite");
         
         this.name = name.trim();
-        this.color = color.trim();
+        if (color != null && !color.isBlank()) this.color = color.trim();
         this.priceHistory.add(initialPrice);
         extent.add(this);
     }

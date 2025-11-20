@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Device extends Product {
     private Line line;
-    List<PortType> ports = new ArrayList<>();
+    private List<PortType> ports = new ArrayList<>();
     private LocalDate releaseDate;
 
 
@@ -33,31 +33,15 @@ public class Device extends Product {
         return line;
     }
 
-    public void setLine(Line line) {
-        if (line == null) throw new IllegalArgumentException("line cannot be null");
-        this.line = line;
-    }
 
     public List<PortType> getPorts() {
         return new ArrayList<>(ports); // defensive copy
     }
 
-    public void setPorts(List<PortType> ports) {
-        if (ports == null) throw new IllegalArgumentException("ports list cannot be null");
-        if (ports.isEmpty()) throw new IllegalArgumentException("device must have at least one port");
-        if (ports.contains(null)) throw new IllegalArgumentException("ports list cannot contain null values");
-        this.ports = new ArrayList<>(ports); // defensive copy
-    }
 
     public LocalDate getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(LocalDate releaseDate) {
-        if (releaseDate == null) throw new IllegalArgumentException("release date cannot be null");
-        if (releaseDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("release date cannot be in the future");
-        if (releaseDate.isBefore(LocalDate.of(1970, 1, 1))) throw new IllegalArgumentException("release date cannot be before 1970");
-        this.releaseDate = releaseDate;
-    }
 
 }
