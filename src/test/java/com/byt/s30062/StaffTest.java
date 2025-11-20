@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,10 +26,12 @@ class StaffTest {
     @Test
     @DisplayName("Should create staff with valid attributes")
     void testValidStaff() {
-        Staff s = new Staff("Alice", "Johnson", 50000.0, false);
+        LocalDate birthDate = LocalDate.of(1990, 5, 15);
+        Staff s = new Staff("Alice", "Johnson", birthDate, 50000.0, false);
         
         assertEquals("Alice", s.getFirstName());
         assertEquals("Johnson", s.getLastName());
+        assertEquals(birthDate, s.getDateOfBirth());
         assertEquals(50000.0, s.getBaseSalary());
         assertFalse(s.isIntern());
     }
@@ -36,21 +39,23 @@ class StaffTest {
     @Test
     @DisplayName("Should reject invalid inputs")
     void testValidations() {
+        LocalDate birthDate = LocalDate.of(1990, 1, 1);
+        
         // Null/blank names
         assertThrows(IllegalArgumentException.class, 
-            () -> new Staff(null, "Doe", 50000.0, false));
+            () -> new Staff(null, "Doe", birthDate, 50000.0, false));
         assertThrows(IllegalArgumentException.class, 
-            () -> new Staff("", "Doe", 50000.0, false));
+            () -> new Staff("", "Doe", birthDate, 50000.0, false));
         
         // Invalid salary
         assertThrows(IllegalArgumentException.class, 
-            () -> new Staff("John", "Doe", -1000.0, false));
+            () -> new Staff("John", "Doe", birthDate, -1000.0, false));
         assertThrows(IllegalArgumentException.class, 
-            () -> new Staff("John", "Doe", Double.NaN, false));
+            () -> new Staff("John", "Doe", birthDate, Double.NaN, false));
         assertThrows(IllegalArgumentException.class, 
-            () -> new Staff("John", "Doe", Double.POSITIVE_INFINITY, false));
+            () -> new Staff("John", "Doe", birthDate, Double.POSITIVE_INFINITY, false));
         assertThrows(IllegalArgumentException.class, 
-            () -> new Staff("John", "Doe", 20_000_000.0, false));
+            () -> new Staff("John", "Doe", birthDate, 20_000_000.0, false));
     }
 
     @Test
@@ -58,10 +63,12 @@ class StaffTest {
     void testExtent() {
         assertEquals(0, Staff.getExtent().size());
         
-        Staff s1 = new Staff("Alice", "Johnson", 50000.0, false);
+        LocalDate birthDate1 = LocalDate.of(1990, 5, 15);
+        Staff s1 = new Staff("Alice", "Johnson", birthDate1, 50000.0, false);
         assertEquals(1, Staff.getExtent().size());
         
-        Staff s2 = new Staff("Bob", "Smith", 60000.0, true);
+        LocalDate birthDate2 = LocalDate.of(1985, 3, 20);
+        Staff s2 = new Staff("Bob", "Smith", birthDate2, 60000.0, true);
         assertEquals(2, Staff.getExtent().size());
         
         assertTrue(Staff.getExtent().contains(s1));
@@ -71,8 +78,11 @@ class StaffTest {
     @Test
     @DisplayName("Should store Manager in Staff extent (inheritance)")
     void testManagerInheritance() {
-        Staff s = new Staff("Alice", "Johnson", 50000.0, false);
-        Manager m = new Manager("Bob", "Smith", 80000.0, false);
+        LocalDate staffBirth = LocalDate.of(1990, 5, 15);
+        Staff s = new Staff("Alice", "Johnson", staffBirth, 50000.0, false);
+        
+        LocalDate managerBirth = LocalDate.of(1985, 3, 20);
+        Manager m = new Manager("Bob", "Smith", managerBirth, 80000.0, false);
         
         assertEquals(2, Staff.getExtent().size());
         assertTrue(Staff.getExtent().contains(s));
@@ -85,7 +95,8 @@ class StaffTest {
     @Test
     @DisplayName("Should maintain encapsulation")
     void testEncapsulation() {
-        Staff s = new Staff("Alice", "Johnson", 50000.0, false);
+        LocalDate birthDate = LocalDate.of(1990, 5, 15);
+        Staff s = new Staff("Alice", "Johnson", birthDate, 50000.0, false);
         
         var extent1 = Staff.getExtent();
         var extent2 = Staff.getExtent();
@@ -98,8 +109,11 @@ class StaffTest {
     @Test
     @DisplayName("Should persist and load extent with polymorphism")
     void testPersistence() throws IOException, ClassNotFoundException {
-        Staff s = new Staff("Alice", "Johnson", 50000.0, false);
-        Manager m = new Manager("Bob", "Smith", 80000.0, false);
+        LocalDate staffBirth = LocalDate.of(1990, 5, 15);
+        Staff s = new Staff("Alice", "Johnson", staffBirth, 50000.0, false);
+        
+        LocalDate managerBirth = LocalDate.of(1985, 3, 20);
+        Manager m = new Manager("Bob", "Smith", managerBirth, 80000.0, false);
         
         Staff.saveExtent();
         assertTrue(new File("staff_extent.ser").exists());

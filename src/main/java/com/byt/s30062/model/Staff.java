@@ -9,46 +9,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Staff implements Serializable {
+public class Staff extends Person {
     private static final long serialVersionUID = 1L;
     private static List<Staff> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "staff_extent.ser";
 
-    private String firstName;
-    private String lastName;
     private double baseSalary;
     private boolean isIntern;
 
-    public Staff(String firstName, String lastName, double baseSalary, boolean isIntern) {
-        if (firstName == null) throw new IllegalArgumentException("firstName cannot be null");
-        if (firstName.isBlank()) throw new IllegalArgumentException("firstName cannot be empty or blank");
-        if (firstName.length() > 50) throw new IllegalArgumentException("firstName cannot exceed 50 characters");
-        if (lastName == null) throw new IllegalArgumentException("lastName cannot be null");
-        if (lastName.isBlank()) throw new IllegalArgumentException("lastName cannot be empty or blank");
-        if (lastName.length() > 50) throw new IllegalArgumentException("lastName cannot exceed 50 characters");
+    public Staff(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary, boolean isIntern) {
+        super(firstName, lastName, dateOfBirth);
         if (baseSalary < 0) throw new IllegalArgumentException("baseSalary cannot be negative");
         if (Double.isNaN(baseSalary)) throw new IllegalArgumentException("baseSalary cannot be NaN");
         if (Double.isInfinite(baseSalary)) throw new IllegalArgumentException("baseSalary cannot be infinite");
         if (baseSalary > 10_000_000) throw new IllegalArgumentException("baseSalary cannot exceed 10,000,000");
 
-        this.firstName = firstName.trim();
-        this.lastName = lastName.trim();
         this.baseSalary = baseSalary;
         this.isIntern = isIntern;
         extent.add(this);
     }
 
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
     public boolean isIntern() { return isIntern; }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
 
     public void setBaseSalary(double baseSalary) {
         this.baseSalary = baseSalary;
@@ -79,11 +60,11 @@ public class Staff implements Serializable {
         if (this == o) return true;
         if (!(o instanceof Staff)) return false;
         Staff s = (Staff) o;
-        return firstName.equals(s.firstName) && lastName.equals(s.lastName) && baseSalary == s.getBaseSalary();
+        return super.equals(o) && baseSalary == s.getBaseSalary();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, lastName, baseSalary);
+        return Objects.hash(super.hashCode(), baseSalary);
     }
 }

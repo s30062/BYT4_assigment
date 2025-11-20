@@ -7,6 +7,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +29,8 @@ class ReportTest {
     @Test
     @DisplayName("Should create report with valid attributes")
     void testValidReport() {
-        Manager m = new Manager("Alice", "Johnson", 80000.0, false);
+        LocalDate birthDate = LocalDate.of(1985, 3, 20);
+        Manager m = new Manager("Alice", "Johnson", birthDate, 80000.0, false);
         Report r = new Report(m, "Monthly sales report content here");
         
         assertNotNull(r.getDateGenerated());
@@ -38,7 +40,8 @@ class ReportTest {
     @Test
     @DisplayName("Should reject invalid inputs")
     void testValidations() {
-        Manager m = new Manager("Alice", "Johnson", 80000.0, false);
+        LocalDate birthDate = LocalDate.of(1985, 3, 20);
+        Manager m = new Manager("Alice", "Johnson", birthDate, 80000.0, false);
         
         // Null manager
         assertThrows(IllegalArgumentException.class, 
@@ -65,7 +68,8 @@ class ReportTest {
     @Test
     @DisplayName("Should store reports in extent")
     void testExtent() {
-        Manager m = new Manager("Alice", "Johnson", 80000.0, false);
+        LocalDate birthDate = LocalDate.of(1985, 3, 20);
+        Manager m = new Manager("Alice", "Johnson", birthDate, 80000.0, false);
         
         assertEquals(0, Report.getExtent().size());
         
@@ -82,7 +86,8 @@ class ReportTest {
     @Test
     @DisplayName("Should maintain encapsulation")
     void testEncapsulation() {
-        Manager m = new Manager("Alice", "Johnson", 80000.0, false);
+        LocalDate birthDate = LocalDate.of(1985, 3, 20);
+        Manager m = new Manager("Alice", "Johnson", birthDate, 80000.0, false);
         Report r = new Report(m, "Report content here");
         
         var extent1 = Report.getExtent();
@@ -96,7 +101,8 @@ class ReportTest {
     @Test
     @DisplayName("Should persist and load extent")
     void testPersistence() throws IOException, ClassNotFoundException {
-        Manager m = new Manager("Alice", "Johnson", 80000.0, false);
+        LocalDate birthDate = LocalDate.of(1985, 3, 20);
+        Manager m = new Manager("Alice", "Johnson", birthDate, 80000.0, false);
         Report r1 = new Report(m, "First report content");
         Report r2 = new Report(m, "Second report content");
         
