@@ -15,13 +15,13 @@ public class Warranty implements Serializable {
     private static final String EXTENT_FILE = "warranty_extent.ser";
 
     private final Purchase purchase;
-    private final Product product;
+    private final Unit unit;
     private LocalDate endDate;
     private static int minimumPeriod = 1;
 
-    public Warranty(Purchase purchase, Product product, LocalDate endDate) {
+    public Warranty(Purchase purchase, Unit unit, LocalDate endDate) {
         if (purchase == null) throw new IllegalArgumentException("purchase cannot be null");
-        if (product == null) throw new IllegalArgumentException("product cannot be null");
+        if (unit == null) throw new IllegalArgumentException("unit cannot be null");
         if (endDate == null) throw new IllegalArgumentException("end date cannot be null");
         
         LocalDate startDate = purchase.getPurchaseDate().toLocalDate();
@@ -34,13 +34,13 @@ public class Warranty implements Serializable {
         }
         if (yearsBetween > 10) throw new IllegalArgumentException("warranty period cannot exceed 10 years");
         
-        // Verify product is in the purchase
-        if (!purchase.getItems().contains(product)) {
-            throw new IllegalArgumentException("product must be part of the purchase");
+        // Verify unit is in the purchase
+        if (!purchase.getItems().contains(unit)) {
+            throw new IllegalArgumentException("unit must be part of the purchase");
         }
         
         this.purchase = purchase;
-        this.product = product;
+        this.unit = unit;
         this.endDate = endDate;
         extent.add(this);
     }
@@ -76,11 +76,11 @@ public class Warranty implements Serializable {
         int totalYears = Period.between(getStartDate(), newEndDate).getYears();
         if (totalYears > 10) throw new IllegalArgumentException("total warranty period cannot exceed 10 years");
         
-        new Warranty(this.purchase, this.product, newEndDate);
+        new Warranty(this.purchase, this.unit, newEndDate);
     }
 
     public Purchase getPurchase() { return purchase; }
-    public Product getProduct() { return product; }
+    public Unit getUnit() { return unit; }
     public LocalDate getStartDate() { return purchase.getPurchaseDate().toLocalDate(); }
     public LocalDate getEndDate() { return endDate; }
 
@@ -102,11 +102,11 @@ public class Warranty implements Serializable {
         if (this == o) return true;
         if (!(o instanceof Warranty)) return false;
         Warranty w = (Warranty) o;
-        return purchase == w.purchase && product == w.product;
+        return purchase == w.purchase && unit == w.unit;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(purchase)+Objects.hash(product);
+        return Objects.hash(purchase)+Objects.hash(unit);
     }
 }

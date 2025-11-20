@@ -3,6 +3,7 @@ package com.byt.s30062;
 import com.byt.s30062.model.Customer;
 import com.byt.s30062.model.Product;
 import com.byt.s30062.model.Purchase;
+import com.byt.s30062.model.Unit;
 import com.byt.s30062.model.enums.PurchaseStatus;
 import org.junit.jupiter.api.*;
 
@@ -20,6 +21,7 @@ class PurchaseTest {
         Purchase.clearExtent();
         Product.clearExtent();
         Customer.clearExtent();
+        Unit.clearExtent();
     }
 
     @AfterEach
@@ -27,6 +29,7 @@ class PurchaseTest {
         Purchase.clearExtent();
         Product.clearExtent();
         Customer.clearExtent();
+        Unit.clearExtent();
         new File("purchase_extent.ser").delete();
     }
 
@@ -37,7 +40,10 @@ class PurchaseTest {
         Product p1 = new Product("iPhone", "Black", 999.0);
         Product p2 = new Product("AirPods", "White", 199.0);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(p1, p2));
+        Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
+        Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
+        
+        Purchase purchase = new Purchase(c, Arrays.asList(u1, u2));
         
         assertEquals(2, purchase.getItems().size());
         assertEquals(PurchaseStatus.Pending, purchase.getStatus());
@@ -51,7 +57,10 @@ class PurchaseTest {
         Product p1 = new Product("iPhone", "Black", 999.0);
         Product p2 = new Product("AirPods", "White", 199.0);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(p1, p2));
+        Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
+        Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
+        
+        Purchase purchase = new Purchase(c, Arrays.asList(u1, u2));
         
         assertEquals(1198.0, purchase.getTotalPrice());
         
@@ -65,10 +74,11 @@ class PurchaseTest {
     void testValidations() {
         Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
         Product p = new Product("iPhone", "Black", 999.0);
+        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
         
         // Null customer
         assertThrows(IllegalArgumentException.class, 
-            () -> new Purchase(null, Arrays.asList(p)));
+            () -> new Purchase(null, Arrays.asList(u)));
         
         // Null items list
         assertThrows(IllegalArgumentException.class, 
@@ -79,7 +89,7 @@ class PurchaseTest {
             () -> new Purchase(c, Arrays.asList()));
         
         // Null status
-        Purchase purchase = new Purchase(c, Arrays.asList(p));
+        Purchase purchase = new Purchase(c, Arrays.asList(u));
         assertThrows(IllegalArgumentException.class, 
             () -> purchase.setStatus(null));
     }
@@ -89,13 +99,15 @@ class PurchaseTest {
     void testExtent() {
         Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
         Product p = new Product("iPhone", "Black", 999.0);
+        Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
+        Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p);
         
         assertEquals(0, Purchase.getExtent().size());
         
-        Purchase pu1 = new Purchase(c, Arrays.asList(p));
+        Purchase pu1 = new Purchase(c, Arrays.asList(u1));
         assertEquals(1, Purchase.getExtent().size());
         
-        Purchase pu2 = new Purchase(c, Arrays.asList(p));
+        Purchase pu2 = new Purchase(c, Arrays.asList(u2));
         assertEquals(2, Purchase.getExtent().size());
         
         assertTrue(Purchase.getExtent().contains(pu1));
@@ -107,8 +119,9 @@ class PurchaseTest {
     void testEncapsulation() {
         Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
         Product p = new Product("iPhone", "Black", 999.0);
+        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(p));
+        Purchase purchase = new Purchase(c, Arrays.asList(u));
         
         var items1 = purchase.getItems();
         var items2 = purchase.getItems();
@@ -125,9 +138,11 @@ class PurchaseTest {
         Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
         Product p1 = new Product("iPhone", "Black", 999.0);
         Product p2 = new Product("iPad", "Silver", 799.0);
+        Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
+        Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase pu1 = new Purchase(c, Arrays.asList(p1));
-        Purchase pu2 = new Purchase(c, Arrays.asList(p2));
+        Purchase pu1 = new Purchase(c, Arrays.asList(u1));
+        Purchase pu2 = new Purchase(c, Arrays.asList(u2));
         
         Purchase.saveExtent();
         assertTrue(new File("purchase_extent.ser").exists());
