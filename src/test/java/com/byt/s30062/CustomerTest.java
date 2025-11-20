@@ -31,7 +31,7 @@ class CustomerTest {
         
         assertEquals("John", c.getFirstName());
         assertEquals("Doe", c.getLastName());
-        assertEquals(birthDate, c.getBirthDate());
+        assertEquals(birthDate, c.getDateOfBirth());
         assertEquals(regDate, c.getRegistrationDate());
     }
 
