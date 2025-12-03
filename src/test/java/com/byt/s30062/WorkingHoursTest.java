@@ -1,6 +1,6 @@
 package com.byt.s30062;
 
-import com.byt.s30062.model.WorkingHours;
+import com.byt.s30062.model.complex.WorkingHours;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;

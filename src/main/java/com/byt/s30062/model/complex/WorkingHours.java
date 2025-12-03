@@ -1,4 +1,4 @@
-package com.byt.s30062.model;
+package com.byt.s30062.model.complex;
 
 import java.io.Serializable;
 import java.util.Objects;

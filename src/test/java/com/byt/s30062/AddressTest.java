@@ -1,6 +1,6 @@
 package com.byt.s30062;
 
-import com.byt.s30062.model.Address;
+import com.byt.s30062.model.complex.Address;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;

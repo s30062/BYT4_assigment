@@ -1,6 +1,6 @@
 package com.byt.s30062;
 
-import com.byt.s30062.model.Address;
+import com.byt.s30062.model.complex.Address;
 import com.byt.s30062.model.Store;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

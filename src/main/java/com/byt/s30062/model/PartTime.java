@@ -1,5 +1,6 @@
 package com.byt.s30062.model;
 
+import com.byt.s30062.model.complex.WorkingHours;
 import com.byt.s30062.model.enums.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;

@@ -1,5 +1,6 @@
 package com.byt.s30062.model;
 
+import com.byt.s30062.model.complex.Address;
 import com.byt.s30062.util.ExtentManager;
 
 import java.io.*;

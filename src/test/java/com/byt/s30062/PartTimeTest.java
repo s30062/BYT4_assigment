@@ -2,7 +2,7 @@ package com.byt.s30062;
 
 import com.byt.s30062.model.PartTime;
 import com.byt.s30062.model.Staff;
-import com.byt.s30062.model.WorkingHours;
+import com.byt.s30062.model.complex.WorkingHours;
 import com.byt.s30062.model.enums.DayOfWeek;
 import org.junit.jupiter.api.*;
 
