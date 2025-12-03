@@ -10,21 +10,26 @@ public class PriceHistory implements Serializable {
     private final double price;
     private final LocalDate dateFrom;
     private LocalDate dateTo;
+    private final Product product; // Composition: owned by exactly one Product
 
-    public PriceHistory(double price, LocalDate dateFrom) {
+    public PriceHistory(double price, LocalDate dateFrom, Product product) {
         if (Double.isNaN(price)) throw new IllegalArgumentException("price cannot be NaN");
         if (Double.isInfinite(price)) throw new IllegalArgumentException("price cannot be infinite");
         if (price <= 0) throw new IllegalArgumentException("price must be positive");
         if (dateFrom == null) throw new IllegalArgumentException("dateFrom cannot be null");
         if (dateFrom.isAfter(LocalDate.now())) throw new IllegalArgumentException("dateFrom cannot be in the future");
         if (dateFrom.isBefore(LocalDate.of(1900, 1, 1))) throw new IllegalArgumentException("dateFrom cannot be before 1900");
+        if (product == null) throw new IllegalArgumentException("product cannot be null");
 
         this.price = price;
         this.dateFrom = dateFrom;
         this.dateTo = null; // optional
+        this.product = product; // Immutable reference to owning product
     }
 
     public double getPrice() { return price; }
+
+    public Product getProduct() { return product; }
 
     public LocalDate getDateFrom() { return dateFrom; }
 

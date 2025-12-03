@@ -3,9 +3,8 @@ package com.byt.s30062.model;
 import com.byt.s30062.util.ExtentManager;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.util.*;
 
 public class Product implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -15,40 +14,76 @@ public class Product implements Serializable {
     private final String name;
     private String color;
 
-    // temporary decision
-    private List<Double> priceHistory = new ArrayList<>();
+    // Composition: Product owns PriceHistory objects. If Product is deleted, all its PriceHistory is deleted.
+    private List<PriceHistory> priceHistory = new ArrayList<>();
 
     public Product(String name, String color, double initialPrice) {
         if (name == null) throw new IllegalArgumentException("name cannot be null");
         if (name.isBlank()) throw new IllegalArgumentException("name cannot be empty or blank");
         if (name.length() > 100) throw new IllegalArgumentException("name cannot exceed 100 characters");
-//        if (color == null) throw new IllegalArgumentException("color cannot be null");
-//        if (color.isBlank()) throw new IllegalArgumentException("color cannot be empty or blank");
-        if (initialPrice <= 0) throw new IllegalArgumentException("initial price must be positive");
         if (Double.isNaN(initialPrice)) throw new IllegalArgumentException("initial price cannot be NaN");
         if (Double.isInfinite(initialPrice)) throw new IllegalArgumentException("initial price cannot be infinite");
+        if (initialPrice <= 0) throw new IllegalArgumentException("initial price must be positive");
         
         this.name = name.trim();
         if (color != null && !color.isBlank()) this.color = color.trim();
-        this.priceHistory.add(initialPrice);
+        // Create initial price history entry (composition: PriceHistory belongs to this Product)
+        this.priceHistory.add(new PriceHistory(initialPrice, LocalDate.now(), this));
         extent.add(this);
     }
 
     public String getName() { return name; }
 
-    // temporary decision - derived attribute
-    public double getCurrentPrice() { 
-        return priceHistory.get(priceHistory.size() - 1); 
+    public String getColor() { return color; }
+
+    // Derived attribute: get the current (active) price today
+    public double getCurrentPrice() {
+        LocalDate today = LocalDate.now();
+        // Iterate in reverse to find the most recent active price
+        for (int i = priceHistory.size() - 1; i >= 0; i--) {
+            PriceHistory ph = priceHistory.get(i);
+            // Check if this price is active today: started today or before, and not yet ended (or ends today or after)
+            if ((ph.getDateFrom().isBefore(today) || ph.getDateFrom().isEqual(today))
+                    &&
+                    (ph.getDateTo() == null || ph.getDateTo().isAfter(today) || ph.getDateTo().isEqual(today))){
+                return ph.getPrice();
+            }
+        }
+        return 0.;
     }
 
+    // Get all price values as doubles (for backward compatibility with tests)
+    public List<Double> getPriceHistory() {
+        List<Double> prices = new ArrayList<>();
+        for (PriceHistory ph : priceHistory) {
+            prices.add(ph.getPrice());
+        }
+        return prices;
+    }
 
-    public List<Double> getPriceHistory() { return new ArrayList<>(priceHistory); }
+    // Get all price history entries (full objects)
+    public List<PriceHistory> getPriceHistoryObjects() { 
+        return new ArrayList<>(priceHistory); 
+    }
 
+    // Add new price entry to history
     public void updatePrice(double newPrice) {
         if (newPrice <= 0) throw new IllegalArgumentException("price must be positive");
         if (Double.isNaN(newPrice)) throw new IllegalArgumentException("price cannot be NaN");
         if (Double.isInfinite(newPrice)) throw new IllegalArgumentException("price cannot be infinite");
-        this.priceHistory.add(newPrice);
+        
+        LocalDate today = LocalDate.now();
+        
+        // End the current (last) price history entry (if it doesn't have an end date yet)
+        if (!priceHistory.isEmpty()) {
+            PriceHistory lastPrice = priceHistory.get(priceHistory.size() - 1);
+            if (lastPrice.getDateTo() == null && !lastPrice.getDateFrom().isEqual(today)) {
+                lastPrice.setDateTo(today);
+            }
+        }
+        
+        // Add new price entry
+        this.priceHistory.add(new PriceHistory(newPrice, today, this));
     }
 
 
@@ -61,6 +96,12 @@ public class Product implements Serializable {
 
     public static void loadExtent() throws IOException, ClassNotFoundException {
         extent = ExtentManager.loadExtent(EXTENT_FILE);
+    }
+
+    // Delete a product: cascade delete all composed PriceHistory objects
+    public void delete() {
+        priceHistory.clear(); // Clear all composed PriceHistory objects
+        extent.remove(this); // Remove from extent
     }
 
     // For testing purposes only - clears extent
