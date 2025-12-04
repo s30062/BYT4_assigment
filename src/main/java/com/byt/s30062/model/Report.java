@@ -28,10 +28,25 @@ public class Report implements Serializable {
         this.content = content.trim();
         this.dateGenerated = LocalDateTime.now();
         extent.add(this);
+        
+        // Link report to manager (bidirectional)
+        manager.linkReport(this);
     }
 
+    public Manager getManager() { return manager; }
     public LocalDateTime getDateGenerated() { return dateGenerated; }
     public String getContent() { return content; }
+
+    // Delete this Report and unlink from manager
+    public void delete() {
+        manager.unlinkReport(this);
+        extent.remove(this);
+    }
+
+    // Remove this Report from extent only (called by Manager when unlinking)
+    void removeFromExtent() {
+        extent.remove(this);
+    }
 
     public static List<Report> getExtent() { return new ArrayList<>(extent); }
 
