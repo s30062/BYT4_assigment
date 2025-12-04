@@ -35,6 +35,9 @@ public class Purchase implements Serializable {
         
         extent.add(this);
         
+        // Link purchase to customer (bidirectional)
+        customer.linkPurchase(this);
+        
         // Link each unit to this purchase (after items and extent are set)
         for (Unit unit : items) {
             unit.setPurchase(this);
@@ -42,10 +45,11 @@ public class Purchase implements Serializable {
     }
 
 
+    public Customer getCustomer() { return customer; }
+
     public List<Unit> getItems() { return Collections.unmodifiableList(items); }
 
-
-      // derived attribute total price
+    // derived attribute total price
     public double getTotalPrice() {
         double sum = 0.;
         for (Unit u : items){
@@ -72,6 +76,16 @@ public class Purchase implements Serializable {
         this.status = status;
     }
 
+    // Delete this Purchase and unlink from customer
+    public void delete() {
+        customer.unlinkPurchase(this);
+        extent.remove(this);
+    }
+
+    // Remove this Purchase from extent only (called by Customer when unlinking)
+    void removeFromExtent() {
+        extent.remove(this);
+    }
 
     public static List<Purchase> getExtent() { return new ArrayList<>(extent); }
 
