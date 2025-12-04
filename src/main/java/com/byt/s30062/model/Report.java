@@ -5,6 +5,7 @@ import com.byt.s30062.util.ExtentManager;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,6 +17,7 @@ public class Report implements Serializable {
     private final Manager manager;
     private final LocalDateTime dateGenerated;
     private final String content;
+    private List<Purchase> purchases = new ArrayList<>(); // 0..many purchases associated with this report
 
     public Report(Manager manager, String content) {
         if (manager == null) throw new IllegalArgumentException("manager cannot be null");
@@ -36,6 +38,40 @@ public class Report implements Serializable {
     public Manager getManager() { return manager; }
     public LocalDateTime getDateGenerated() { return dateGenerated; }
     public String getContent() { return content; }
+
+    public List<Purchase> getPurchases() {
+        return new ArrayList<>(purchases);
+    }
+
+    // Called by Purchase to link itself to this report
+    void linkPurchase(Purchase purchase) {
+        if (purchase != null && !purchases.contains(purchase)) {
+            purchases.add(purchase);
+        }
+    }
+
+    // Called when Purchase is unlinked from this report
+    void unlinkPurchase(Purchase purchase) {
+        if (purchase != null) {
+            purchases.remove(purchase);
+        }
+    }
+
+    // Add purchase to this report (bidirectional link)
+    public void addPurchase(Purchase purchase) {
+        if (purchase != null) {
+            linkPurchase(purchase);
+            purchase.linkReport(this);
+        }
+    }
+
+    // Remove purchase from this report (bidirectional unlink)
+    public void removePurchase(Purchase purchase) {
+        if (purchase != null) {
+            unlinkPurchase(purchase);
+            purchase.unlinkReport(this);
+        }
+    }
 
     // Delete this Report and unlink from manager
     public void delete() {
