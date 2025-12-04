@@ -15,14 +15,14 @@ public class HistoryOfEmployment implements Serializable {
 
     private final LocalDate dateOfStart;
     private LocalDate dateOfFinish; // optional
-    private final Person person;
+    private final Staff staff;
     private final Store store;
 
-    public HistoryOfEmployment(LocalDate dateOfStart, Person person, Store store) {
-        this(dateOfStart, null, person, store);
+    public HistoryOfEmployment(LocalDate dateOfStart, Staff staff, Store store) {
+        this(dateOfStart, null, staff, store);
     }
 
-    public HistoryOfEmployment(LocalDate dateOfStart, LocalDate dateOfFinish, Person person, Store store) {
+    public HistoryOfEmployment(LocalDate dateOfStart, LocalDate dateOfFinish, Staff staff, Store store) {
         if (dateOfStart == null) throw new IllegalArgumentException("dateOfStart cannot be null");
         if (dateOfStart.isAfter(LocalDate.now())) throw new IllegalArgumentException("dateOfStart cannot be in the future");
         if (dateOfStart.isBefore(LocalDate.of(1900, 1, 1))) throw new IllegalArgumentException("dateOfStart cannot be before 1900");
@@ -32,21 +32,32 @@ public class HistoryOfEmployment implements Serializable {
             if (dateOfFinish.isAfter(LocalDate.now())) throw new IllegalArgumentException("dateOfFinish cannot be in the future");
         }
         
-        if (person == null) throw new IllegalArgumentException("person cannot be null");
+        if (staff == null) throw new IllegalArgumentException("staff cannot be null");
         if (store == null) throw new IllegalArgumentException("store cannot be null");
+        
+        // Constraint: Staff can only work at one specific store throughout their career
+        for (HistoryOfEmployment existing : staff.employmentHistory) {
+            if (!existing.getStore().equals(store)) {
+                throw new IllegalArgumentException("Staff is assigned to a different store and cannot work at multiple stores");
+            }
+        }
         
         this.dateOfStart = dateOfStart;
         this.dateOfFinish = dateOfFinish;
-        this.person = person;
+        this.staff = staff;
         this.store = store;
         extent.add(this);
+        
+        // Link to store and staff (bag association)
+        staff.employmentHistory.add(this);
+        store.employmentHistory.add(this);
     }
 
     public LocalDate getDateOfStart() { return dateOfStart; }
 
     public LocalDate getDateOfFinish() { return dateOfFinish; }
 
-    public Person getPerson() { return person; }
+    public Staff getStaff() { return staff; }
 
     public Store getStore() { return store; }
 
@@ -82,19 +93,19 @@ public class HistoryOfEmployment implements Serializable {
         HistoryOfEmployment hoe = (HistoryOfEmployment) o;
         return dateOfStart.isEqual(hoe.dateOfStart) && 
                Objects.equals(dateOfFinish, hoe.dateOfFinish) &&
-               person.equals(hoe.person) && 
+               staff.equals(hoe.staff) && 
                store.equals(hoe.store);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dateOfStart, dateOfFinish, person, store);
+        return Objects.hash(dateOfStart, dateOfFinish, staff, store);
     }
 
     @Override
     public String toString() {
-        return String.format("HistoryOfEmployment(Person:%s, Store:%s, Start:%s, Finish:%s, Active:%s)", 
-            person.getFirstName() + " " + person.getLastName(), 
+        return String.format("HistoryOfEmployment(Staff:%s, Store:%s, Start:%s, Finish:%s, Active:%s)", 
+            staff.getFirstName() + " " + staff.getLastName(), 
             store.getAddress().getCity(), 
             dateOfStart, 
             dateOfFinish, 

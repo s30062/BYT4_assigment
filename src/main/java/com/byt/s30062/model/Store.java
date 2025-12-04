@@ -22,6 +22,9 @@ public class Store implements Serializable {
 
     // Ordered association: units sorted by serial number
     private final List<Unit> units = new ArrayList<>();
+    
+    // Bag association: employment history records (managed by HistoryOfEmployment)
+    List<HistoryOfEmployment> employmentHistory = new ArrayList<>();
 
     public Store(Address address, LocalDate dateOfOpening) {
         if (address == null) throw new IllegalArgumentException("address cannot be null");
@@ -55,6 +58,10 @@ public class Store implements Serializable {
         if (units.remove(unit)) {
             unit.clearStore();
         }
+    }
+
+    public List<HistoryOfEmployment> getEmploymentHistory() {
+        return new ArrayList<>(employmentHistory);
     }
 
     public static List<Store> getExtent() { return new ArrayList<>(extent); }

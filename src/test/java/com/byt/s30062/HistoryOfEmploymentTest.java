@@ -37,7 +37,7 @@ class HistoryOfEmploymentTest {
         
         assertEquals(startDate, hoe.getDateOfStart());
         assertNull(hoe.getDateOfFinish());
-        assertEquals(person, hoe.getPerson());
+        assertEquals(person, hoe.getStaff());
         assertEquals(store, hoe.getStore());
         assertTrue(hoe.isActive());
     }
@@ -51,7 +51,7 @@ class HistoryOfEmploymentTest {
         
         assertEquals(startDate, hoe.getDateOfStart());
         assertEquals(finishDate, hoe.getDateOfFinish());
-        assertEquals(person, hoe.getPerson());
+        assertEquals(person, hoe.getStaff());
         assertEquals(store, hoe.getStore());
         assertFalse(hoe.isActive());
     }

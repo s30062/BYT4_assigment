@@ -6,6 +6,7 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,6 +17,9 @@ public class Staff extends Person {
 
     private double baseSalary;
     private boolean isIntern;
+    
+    // Bag association: employment history records (managed by HistoryOfEmployment)
+    List<HistoryOfEmployment> employmentHistory = new ArrayList<>();
 
     public Staff(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary, boolean isIntern) {
         super(firstName, lastName, dateOfBirth);
@@ -41,6 +45,10 @@ public class Staff extends Person {
 
     public void setIntern(boolean intern) {
         isIntern = intern;
+    }
+
+    public List<HistoryOfEmployment> getEmploymentHistory() {
+        return new ArrayList<>(employmentHistory);
     }
 
     public static List<Staff> getExtent() { return new ArrayList<>(extent); }
