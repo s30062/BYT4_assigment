@@ -6,11 +6,10 @@ import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProductPriceHistoryCompositionTest {
+class ProductPriceHistoryAssociationTest {
 
     @BeforeEach
     void setup() {
