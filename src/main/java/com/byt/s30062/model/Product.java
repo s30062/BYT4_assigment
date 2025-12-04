@@ -17,6 +17,9 @@ public class Product implements Serializable {
     // Composition: Product owns PriceHistory objects. If Product is deleted, all its PriceHistory is deleted.
     private List<PriceHistory> priceHistory = new ArrayList<>();
 
+    // Association: Product may have 0 to many Units (each Unit references exactly one Product)
+    private List<Unit> units = new ArrayList<>();
+
     public Product(String name, String color, double initialPrice) {
         if (name == null) throw new IllegalArgumentException("name cannot be null");
         if (name.isBlank()) throw new IllegalArgumentException("name cannot be empty or blank");
@@ -64,6 +67,28 @@ public class Product implements Serializable {
     // Get all price history entries (full objects)
     public List<PriceHistory> getPriceHistoryObjects() { 
         return new ArrayList<>(priceHistory); 
+    }
+
+    // Get all units of this product
+    public List<Unit> getUnits() {
+        return new ArrayList<>(units);
+    }
+
+    // Called by Unit constructor to register itself with this product
+    public void linkUnit(Unit unit) {
+        if (unit != null && !units.contains(unit)) {
+            units.add(unit);
+        }
+    }
+
+    // Called when Unit is deleted or disassociated from this Product
+    // Deletes the Unit from system since Unit must be associated with exactly one Product
+    public void unlinkUnit(Unit unit) {
+        if (unit != null) {
+            units.remove(unit);
+            // Unit is now orphaned (has no product), so delete it from system
+            unit.delete();
+        }
     }
 
     // Add new price entry to history

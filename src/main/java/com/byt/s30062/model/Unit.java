@@ -33,6 +33,9 @@ public class Unit implements Serializable {
         this.serialNumber = serialNumber.trim();
         this.product = product;
         this.purchase = null; // optional
+        
+        // Establish bidirectional link with Product
+        product.linkUnit(this);
         extent.add(this);
     }
 
@@ -55,6 +58,11 @@ public class Unit implements Serializable {
     }
 
     public boolean isPurchased() { return purchase != null; }
+
+    // Delete this Unit from the system
+    public void delete() {
+        extent.remove(this);
+    }
 
     public static List<Unit> getExtent() { return new ArrayList<>(extent); }
 
