@@ -17,6 +17,7 @@ public class Unit implements Serializable {
     private final String serialNumber;
     private Purchase purchase; // optional, 0..1 multiplicity
     private final Product product;
+    private Store store; // optional, 0..1 (Unit may be in 0 or 1 store)
 
     public Unit(LocalDate manufacturingDate, String serialNumber, Product product) {
         if (manufacturingDate == null) throw new IllegalArgumentException("manufacturingDate cannot be null");
@@ -46,6 +47,28 @@ public class Unit implements Serializable {
     public Purchase getPurchase() { return purchase; }
 
     public Product getProduct() { return product; }
+
+    public Store getStore() { return store; }
+
+    // Set store for this unit (0..1). Maintains ordered association.
+    public void setStore(Store newStore) {
+        // If changing stores, unlink from old store
+        if (this.store != null && this.store != newStore) {
+            this.store.unlinkUnit(this); // will clear this.store
+        }
+        // Set new store and link
+        if (newStore != null) {
+            this.store = newStore;
+            newStore.linkUnit(this);
+        } else {
+            this.store = null;
+        }
+    }
+
+    // Called by Store.unlinkUnit() to clear store reference
+    void clearStore() {
+        this.store = null;
+    }
 
     public void setPurchase(Purchase purchase) {
         if (purchase != null) {

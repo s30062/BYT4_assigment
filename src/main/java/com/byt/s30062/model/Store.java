@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import java.util.Collections;
+import java.util.Comparator;
+
 public class Store implements Serializable {
     private static final long serialVersionUID = 1L;
     private static List<Store> extent = new ArrayList<>();
@@ -16,6 +19,9 @@ public class Store implements Serializable {
 
     private final Address address;
     private final LocalDate dateOfOpening;
+
+    // Ordered association: units sorted by serial number
+    private final List<Unit> units = new ArrayList<>();
 
     public Store(Address address, LocalDate dateOfOpening) {
         if (address == null) throw new IllegalArgumentException("address cannot be null");
@@ -31,6 +37,25 @@ public class Store implements Serializable {
     public Address getAddress() { return address; }
 
     public LocalDate getDateOfOpening() { return dateOfOpening; }
+
+    public List<Unit> getUnits() {
+        return new ArrayList<>(units);
+    }
+
+    public void linkUnit(Unit unit) {
+        if (unit == null) return;
+        if (!units.contains(unit)) {
+            units.add(unit);
+            units.sort(Comparator.comparing(Unit::getSerialNumber));
+        }
+    }
+
+    public void unlinkUnit(Unit unit) {
+        if (unit == null) return;
+        if (units.remove(unit)) {
+            unit.clearStore();
+        }
+    }
 
     public static List<Store> getExtent() { return new ArrayList<>(extent); }
 
