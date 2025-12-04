@@ -19,6 +19,7 @@ public class Purchase implements Serializable {
     private final LocalDateTime purchaseDate;
     private List<Unit> items = new ArrayList<>(); // multi-value attribute: units purchased
     private String deliveryAddress; // optional for in-store vs online
+    private List<Report> reports = new ArrayList<>(); // 0..many reports associated with this purchase
 
     private PurchaseStatus status;
 
@@ -35,6 +36,9 @@ public class Purchase implements Serializable {
         
         extent.add(this);
         
+        // Link purchase to customer (bidirectional)
+        customer.linkPurchase(this);
+        
         // Link each unit to this purchase (after items and extent are set)
         for (Unit unit : items) {
             unit.setPurchase(this);
@@ -42,10 +46,29 @@ public class Purchase implements Serializable {
     }
 
 
+    public Customer getCustomer() { return customer; }
+
+    public List<Report> getReports() {
+        return new ArrayList<>(reports);
+    }
+
+    // Called by Report to link itself to this purchase
+    void linkReport(Report report) {
+        if (report != null && !reports.contains(report)) {
+            reports.add(report);
+        }
+    }
+
+    // Called when Report is unlinked from this purchase
+    void unlinkReport(Report report) {
+        if (report != null) {
+            reports.remove(report);
+        }
+    }
+
     public List<Unit> getItems() { return Collections.unmodifiableList(items); }
 
-
-      // derived attribute total price
+    // derived attribute total price
     public double getTotalPrice() {
         double sum = 0.;
         for (Unit u : items){
@@ -72,6 +95,32 @@ public class Purchase implements Serializable {
         this.status = status;
     }
 
+    // Add report to this purchase (bidirectional link)
+    public void addReport(Report report) {
+        if (report != null) {
+            linkReport(report);
+            report.linkPurchase(this);
+        }
+    }
+
+    // Remove report from this purchase (bidirectional unlink)
+    public void removeReport(Report report) {
+        if (report != null) {
+            unlinkReport(report);
+            report.unlinkPurchase(this);
+        }
+    }
+
+    // Delete this Purchase and unlink from customer
+    public void delete() {
+        customer.unlinkPurchase(this);
+        extent.remove(this);
+    }
+
+    // Remove this Purchase from extent only (called by Customer when unlinking)
+    void removeFromExtent() {
+        extent.remove(this);
+    }
 
     public static List<Purchase> getExtent() { return new ArrayList<>(extent); }
 

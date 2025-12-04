@@ -5,6 +5,7 @@ import com.byt.s30062.util.ExtentManager;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,6 +15,7 @@ public class Customer extends Person {
     private static final String EXTENT_FILE = "customer_extent.ser";
 
     private final LocalDate registrationDate; // basic attribute
+    private List<Purchase> purchases = new ArrayList<>(); // 0..many purchases for this customer
 
     public Customer(String firstName, String lastName, LocalDate dateOfBirth, LocalDate registrationDate) {
         super(firstName, lastName, dateOfBirth);
@@ -31,6 +33,32 @@ public class Customer extends Person {
 
     public LocalDate getRegistrationDate() { return registrationDate; }
 
+    public List<Purchase> getPurchases() {
+        return new ArrayList<>(purchases);
+    }
+
+    // Called by Purchase constructor to link itself to this customer
+    void linkPurchase(Purchase purchase) {
+        if (purchase != null && !purchases.contains(purchase)) {
+            purchases.add(purchase);
+        }
+    }
+
+    // Called if Purchase is deleted or unlinked
+    // Removes purchase from customer's list AND deletes it from system (mandatory relationship)
+    void unlinkPurchase(Purchase purchase) {
+        if (purchase != null) {
+            purchases.remove(purchase);
+            purchase.removeFromExtent(); // Purchase cannot exist without a customer
+        }
+    }
+
+    // Public method to unlink a purchase (removes it from system due to mandatory relationship)
+    public void removePurchase(Purchase purchase) {
+        if (purchase != null) {
+            unlinkPurchase(purchase);
+        }
+    }
 
     public static List<Customer> getExtent() { return new ArrayList<>(extent); }
 

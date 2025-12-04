@@ -6,12 +6,15 @@ import com.byt.s30062.model.enums.PortType;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Device extends Product {
     private Line line;
-    private List<PortType> ports = new ArrayList<>();
+    private List<PortType> ports;
     private LocalDate releaseDate;
+    private Set<Accessory> accessories = new HashSet<>();
 
 
     public Device(Line line, List<PortType> ports, LocalDate releaseDate, String name, String color, double initialPrice) {
@@ -43,5 +46,31 @@ public class Device extends Product {
         return releaseDate;
     }
 
+    public Set<Accessory> getAccessories(){
+        return new HashSet<>(accessories);
+    }
+
+    // Public API: add/remove from Device delegate to Accessory to keep qualified map authoritative
+    public void addAccessory(Accessory accessory){
+        if (accessory == null) throw new IllegalArgumentException("accessory cannot be null");
+        // Delegates to Accessory; Accessory will call back linkAccessory
+        accessory.addDesignedFor(this);
+    }
+
+    public void removeAccessory(Accessory accessory){
+        if (accessory == null) return;
+        // Remove by qualifier (device name); Accessory will call back unlinkAccessory
+        accessory.removeDesignedFor(this.getName());
+    }
+
+    // Called by Accessory to maintain reverse connection (package-private intended usage)
+    void linkAccessory(Accessory accessory){
+        accessories.add(accessory);
+    }
+
+    // Called by Accessory to maintain reverse connection (package-private intended usage)
+    void unlinkAccessory(Accessory accessory){
+        accessories.remove(accessory);
+    }
 
 }
