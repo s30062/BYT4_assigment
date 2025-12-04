@@ -73,5 +73,4 @@ public class Device extends Product {
         accessories.remove(accessory);
     }
 
-
 }

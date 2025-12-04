@@ -42,14 +42,6 @@ public class Accessory extends Product {
         }
     }
 
-    // Update qualifier when device name changes: remove by old name, add by new name
-    public void updateQualifierOfDesignedFor(String oldDeviceName, Device deviceWithNewName){
-        if (designedFor.containsKey(oldDeviceName) && designedFor.get(oldDeviceName).equals(deviceWithNewName)){
-            designedFor.remove(oldDeviceName);
-            designedFor.put(deviceWithNewName.getName(), deviceWithNewName);
-        }
-    }
-
     // Retrieve device by qualifier (device name)
     public Device getDesignedForByName(String deviceName){
         return designedFor.getOrDefault(deviceName, null);
