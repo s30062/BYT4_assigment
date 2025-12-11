@@ -15,9 +15,11 @@ public class Unit implements Serializable {
 
     private final LocalDate manufacturingDate;
     private final String serialNumber;
-    private Purchase purchase; // optional, 0..1 multiplicity
     private final Product product;
     private Store store; // optional, 0..1 (Unit may be in 0 or 1 store)
+    
+    // Association through Warranty: unit may have 0..many warranties
+    List<Warranty> warranties = new ArrayList<>();
 
     public Unit(LocalDate manufacturingDate, String serialNumber, Product product) {
         if (manufacturingDate == null) throw new IllegalArgumentException("manufacturingDate cannot be null");
@@ -33,7 +35,6 @@ public class Unit implements Serializable {
         this.manufacturingDate = manufacturingDate;
         this.serialNumber = serialNumber.trim();
         this.product = product;
-        this.purchase = null; // optional
         
         // Establish bidirectional link with Product
         product.linkUnit(this);
@@ -44,7 +45,14 @@ public class Unit implements Serializable {
 
     public String getSerialNumber() { return serialNumber; }
 
-    public Purchase getPurchase() { return purchase; }
+    // Get all warranties for this unit
+    public List<Warranty> getWarranties() { return new ArrayList<>(warranties); }
+    
+    // Derived: get purchase if this unit has a warranty (0..1)
+    public Purchase getPurchase() {
+        if (warranties.isEmpty()) return null;
+        return warranties.get(0).getPurchase();
+    }
 
     public Product getProduct() { return product; }
 
@@ -70,17 +78,28 @@ public class Unit implements Serializable {
         this.store = null;
     }
 
-    public void setPurchase(Purchase purchase) {
-        if (purchase != null) {
-            // Verify that this unit is in the purchase
-            if (!purchase.getItems().contains(this)) {
-                throw new IllegalArgumentException("unit must be part of the purchase");
+    // Called by Warranty to link itself to this unit
+    void linkWarranty(Warranty warranty) {
+        if (warranty != null && !warranties.contains(warranty)) {
+            // Constraint: unit can be associated with at most one purchase
+            if (!warranties.isEmpty()) {
+                Purchase existingPurchase = warranties.get(0).getPurchase();
+                if (!existingPurchase.equals(warranty.getPurchase())) {
+                    throw new IllegalArgumentException("Unit can only be associated with one purchase");
+                }
             }
+            warranties.add(warranty);
         }
-        this.purchase = purchase;
+    }
+    
+    // Called by Warranty when removed
+    void unlinkWarranty(Warranty warranty) {
+        if (warranty != null) {
+            warranties.remove(warranty);
+        }
     }
 
-    public boolean isPurchased() { return purchase != null; }
+    public boolean isPurchased() { return !warranties.isEmpty(); }
 
     // Delete this Unit from the system
     public void delete() {

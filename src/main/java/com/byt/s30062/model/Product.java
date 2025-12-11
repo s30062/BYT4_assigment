@@ -91,6 +91,31 @@ public class Product implements Serializable {
         }
     }
 
+    // Add unit to purchase via warranty (shopping cart operation)
+    // This creates a dummy warranty (endDate=null) that links the unit to the purchase
+    // The endDate is set later when purchase is finalized
+    public void addToCart(Purchase purchase, Unit unit) {
+        if (purchase == null) throw new IllegalArgumentException("purchase cannot be null");
+        if (unit == null) throw new IllegalArgumentException("unit cannot be null");
+        if (!unit.getProduct().equals(this)) throw new IllegalArgumentException("unit must belong to this product");
+        
+        // Create dummy warranty which automatically links unit to purchase
+        new Warranty(purchase, unit);
+    }
+
+    // Remove unit from purchase by deleting its warranty
+    public void removeFromCart(Purchase purchase, Unit unit) {
+        if (purchase == null || unit == null) return;
+        
+        // Find and delete the warranty linking this unit to this purchase
+        for (Warranty w : new ArrayList<>(purchase.getWarranties())) {
+            if (w.getUnit().equals(unit)) {
+                w.delete(); // Warranty handles unlinking from both sides
+                break;
+            }
+        }
+    }
+
     // Add new price entry to history
     public void updatePrice(double newPrice) {
         if (newPrice <= 0) throw new IllegalArgumentException("price must be positive");

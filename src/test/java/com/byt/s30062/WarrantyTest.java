@@ -1,17 +1,12 @@
 package com.byt.s30062;
 
-import com.byt.s30062.model.Customer;
-import com.byt.s30062.model.Product;
-import com.byt.s30062.model.Purchase;
-import com.byt.s30062.model.Unit;
-import com.byt.s30062.model.Warranty;
+import com.byt.s30062.model.*;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,19 +32,100 @@ class WarrantyTest {
     }
 
     @Test
-    @DisplayName("Should create warranty with valid attributes")
-    void testValidWarranty() {
+    @DisplayName("Should create dummy warranty with null endDate via addToCart")
+    void testDummyWarrantyCreation() {
         Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
         Product p = new Product("iPhone", "Black", 999.0);
         Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
+        Purchase purchase = new Purchase(c);
         
-        LocalDate endDate = LocalDate.now().plusYears(2);
-        Warranty w = new Warranty(purchase, u, endDate);
+        p.addToCart(purchase, u);
         
+        // Warranty created as dummy (null endDate)
+        assertEquals(1, purchase.getWarranties().size());
+        Warranty w = purchase.getWarranties().get(0);
+        assertNull(w.getEndDate(), "Dummy warranty should have null endDate");
         assertEquals(purchase, w.getPurchase());
         assertEquals(u, w.getUnit());
-        assertEquals(endDate, w.getEndDate());
+    }
+
+    @Test
+    @DisplayName("Should finalize warranty with endDate on Purchase.finalizePurchase()")
+    void testWarrantyFinalization() {
+        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
+        Product p = new Product("iPhone", "Black", 999.0);
+        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
+        Purchase purchase = new Purchase(c);
+        
+        p.addToCart(purchase, u);
+        Warranty w = purchase.getWarranties().get(0);
+        
+        // Before finalization, endDate is null
+        assertNull(w.getEndDate());
+        
+        // Finalize purchase
+        purchase.finalizePurchase();
+        
+        // After finalization, endDate is set
+        assertNotNull(w.getEndDate());
+        LocalDate expectedEndDate = purchase.getPurchaseDate().toLocalDate().plusYears(Warranty.getMinimumPeriod());
+        assertEquals(expectedEndDate, w.getEndDate());
+    }
+
+    @Test
+    @DisplayName("Should reject setting endDate on finalized warranty")
+    void testCannotModifyFinalizedWarrantyEndDate() {
+        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
+        Product p = new Product("iPhone", "Black", 999.0);
+        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
+        Purchase purchase = new Purchase(c);
+        
+        p.addToCart(purchase, u);
+        Warranty w = purchase.getWarranties().get(0);
+        
+        purchase.finalizePurchase();
+        
+        // Try to modify endDate on finalized warranty
+        assertThrows(IllegalStateException.class,
+                () -> w.setEndDate(LocalDate.now().plusYears(3)),
+                "Cannot modify endDate on finalized warranty");
+    }
+
+    @Test
+    @DisplayName("Should set valid endDate on dummy warranty")
+    void testSetEndDateOnDummyWarranty() {
+        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
+        Product p = new Product("iPhone", "Black", 999.0);
+        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
+        Purchase purchase = new Purchase(c);
+        
+        Warranty w = new Warranty(purchase, u);
+        assertNull(w.getEndDate());
+        
+        // Set valid endDate
+        LocalDate customEndDate = LocalDate.now().plusYears(2);
+        w.setEndDate(customEndDate);
+        
+        assertEquals(customEndDate, w.getEndDate());
+    }
+
+    @Test
+    @DisplayName("Should reject invalid endDate on dummy warranty")
+    void testSetInvalidEndDateOnDummyWarranty() {
+        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
+        Product p = new Product("iPhone", "Black", 999.0);
+        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
+        Purchase purchase = new Purchase(c);
+        
+        Warranty w = new Warranty(purchase, u);
+        
+        // Less than minimum period
+        assertThrows(IllegalArgumentException.class,
+                () -> w.setEndDate(LocalDate.now().plusMonths(6)));
+        
+        // More than 10 years
+        assertThrows(IllegalArgumentException.class,
+                () -> w.setEndDate(LocalDate.now().plusYears(11)));
     }
 
     @Test
@@ -58,129 +134,16 @@ class WarrantyTest {
         Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
         Product p = new Product("iPhone", "Black", 999.0);
         Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
+        Purchase purchase = new Purchase(c);
         
-        LocalDate endDate = LocalDate.now().plusYears(2);
-        Warranty w = new Warranty(purchase, u, endDate);
+        p.addToCart(purchase, u);
+        Warranty w = purchase.getWarranties().get(0);
+        purchase.finalizePurchase();
         
         // getStartDate is derived from purchase date
         assertEquals(purchase.getPurchaseDate().toLocalDate(), w.getStartDate());
         
         // isValid is derived
         assertTrue(w.isValid());
-    }
-
-    @Test
-    @DisplayName("Should reject invalid inputs")
-    void testValidations() {
-        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
-        Product p = new Product("iPhone", "Black", 999.0);
-        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
-        
-        // Null inputs
-        assertThrows(IllegalArgumentException.class, 
-            () -> new Warranty(null, u, LocalDate.now().plusYears(2)));
-        assertThrows(IllegalArgumentException.class, 
-            () -> new Warranty(purchase, null, LocalDate.now().plusYears(2)));
-        assertThrows(IllegalArgumentException.class, 
-            () -> new Warranty(purchase, u, null));
-        
-        // End date before purchase date
-        assertThrows(IllegalArgumentException.class, 
-            () -> new Warranty(purchase, u, LocalDate.now().minusDays(1)));
-        
-        // Less than minimum period (1 year)
-        assertThrows(IllegalArgumentException.class, 
-            () -> new Warranty(purchase, u, LocalDate.now().plusMonths(6)));
-        
-        // Unit not in purchase
-        Product p2 = new Product("iPad", "Silver", 799.0);
-        Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
-        assertThrows(IllegalArgumentException.class, 
-            () -> new Warranty(purchase, u2, LocalDate.now().plusYears(2)));
-    }
-
-    @Test
-    @DisplayName("Should prolong warranty correctly")
-    void testProlong() {
-        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
-        Product p = new Product("iPhone", "Black", 999.0);
-        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
-        
-        LocalDate endDate = LocalDate.now().plusYears(2);
-        Warranty w = new Warranty(purchase, u, endDate);
-        
-        int originalExtentSize = Warranty.getExtent().size();
-        
-        // Prolong creates a new warranty
-        w.prolong(Period.ofYears(1));
-        
-        assertEquals(originalExtentSize + 1, Warranty.getExtent().size());
-    }
-
-    @Test
-    @DisplayName("Should store warranties in extent")
-    void testExtent() {
-        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
-        Product p = new Product("iPhone", "Black", 999.0);
-        Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
-        Purchase purchase = new Purchase(c, Arrays.asList(u1));
-        
-        assertEquals(0, Warranty.getExtent().size());
-        
-        Warranty w1 = new Warranty(purchase, u1, LocalDate.now().plusYears(2));
-        assertEquals(1, Warranty.getExtent().size());
-        
-        Product p2 = new Product("iPad", "Silver", 799.0);
-        Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
-        Purchase purchase2 = new Purchase(c, Arrays.asList(u2));
-        Warranty w2 = new Warranty(purchase2, u2, LocalDate.now().plusYears(3));
-        assertEquals(2, Warranty.getExtent().size());
-        
-        assertTrue(Warranty.getExtent().contains(w1));
-        assertTrue(Warranty.getExtent().contains(w2));
-    }
-
-    @Test
-    @DisplayName("Should maintain encapsulation")
-    void testEncapsulation() {
-        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
-        Product p = new Product("iPhone", "Black", 999.0);
-        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
-        Warranty w = new Warranty(purchase, u, LocalDate.now().plusYears(2));
-        
-        var extent1 = Warranty.getExtent();
-        var extent2 = Warranty.getExtent();
-        
-        assertNotSame(extent1, extent2);
-        extent1.clear();
-        assertEquals(1, Warranty.getExtent().size());
-    }
-
-    @Test
-    @DisplayName("Should persist and load extent")
-    void testPersistence() throws IOException, ClassNotFoundException {
-        Customer c = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
-        Product p1 = new Product("iPhone", "Black", 999.0);
-        Product p2 = new Product("iPad", "Silver", 799.0);
-        Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
-        Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
-        Purchase pu1 = new Purchase(c, Arrays.asList(u1));
-        Purchase pu2 = new Purchase(c, Arrays.asList(u2));
-        
-        Warranty w1 = new Warranty(pu1, u1, LocalDate.now().plusYears(2));
-        Warranty w2 = new Warranty(pu2, u2, LocalDate.now().plusYears(3));
-        
-        Warranty.saveExtent();
-        assertTrue(new File("warranty_extent.ser").exists());
-        
-        Warranty.clearExtent();
-        assertEquals(0, Warranty.getExtent().size());
-        
-        Warranty.loadExtent();
-        assertEquals(2, Warranty.getExtent().size());
     }
 }

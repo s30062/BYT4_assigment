@@ -31,7 +31,9 @@ class ReportPurchaseAssociationTest {
     private Purchase createPurchase(Customer customer) {
         Product p = new Product("iPhone", "Black", 999.0);
         Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
-        return new Purchase(customer, Arrays.asList(u));
+        Purchase purchase = new Purchase(customer);
+        p.addToCart(purchase, u);
+        return purchase;
     }
 
     @Test
@@ -91,7 +93,8 @@ class ReportPurchaseAssociationTest {
         Purchase p1 = createPurchase(c1);
         Product p2Prod = new Product("iPad", "White", 599.0);
         Unit p2Unit = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2Prod);
-        Purchase p2 = new Purchase(c2, Arrays.asList(p2Unit));
+        Purchase p2 = new Purchase(c2);
+        p2Prod.addToCart(p2, p2Unit);
         
         r.addPurchase(p1);
         r.addPurchase(p2);
@@ -148,7 +151,8 @@ class ReportPurchaseAssociationTest {
         Purchase p1 = createPurchase(c);
         Product p2Prod = new Product("MacBook", "Silver", 1999.0);
         Unit p2Unit = new Unit(LocalDate.of(2024, 1, 17), "SN003", p2Prod);
-        Purchase p2 = new Purchase(c, Arrays.asList(p2Unit));
+        Purchase p2 = new Purchase(c);
+        p2Prod.addToCart(p2, p2Unit);
         
         r1.addPurchase(p1);
         r1.addPurchase(p2);
@@ -244,7 +248,8 @@ class ReportPurchaseAssociationTest {
         Purchase p1 = createPurchase(c1);
         Product p2Prod = new Product("iPad", "White", 599.0);
         Unit p2Unit = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2Prod);
-        Purchase p2 = new Purchase(c2, Arrays.asList(p2Unit));
+        Purchase p2 = new Purchase(c2);
+        p2Prod.addToCart(p2, p2Unit);
         
         // r1 linked to p1 and p2
         r1.addPurchase(p1);
@@ -281,7 +286,8 @@ class ReportPurchaseAssociationTest {
         Purchase p1 = createPurchase(c);
         Product p2Prod = new Product("iPad", "White", 599.0);
         Unit p2Unit = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2Prod);
-        Purchase p2 = new Purchase(c, Arrays.asList(p2Unit));
+        Purchase p2 = new Purchase(c);
+        p2Prod.addToCart(p2, p2Unit);
         
         r.addPurchase(p1);
         

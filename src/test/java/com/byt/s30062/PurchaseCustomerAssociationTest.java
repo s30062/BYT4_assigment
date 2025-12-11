@@ -7,7 +7,6 @@ import com.byt.s30062.model.Unit;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +30,8 @@ class PurchaseCustomerAssociationTest {
         assertEquals(0, c.getPurchases().size());
         
         // Create purchase
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
+        Purchase purchase = new Purchase(c);
+        p.addToCart(purchase, u);
         
         // Forward link verified
         assertEquals(c, purchase.getCustomer());
@@ -53,9 +53,12 @@ class PurchaseCustomerAssociationTest {
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         Unit u3 = new Unit(LocalDate.of(2024, 1, 17), "SN003", p3);
         
-        Purchase purchase1 = new Purchase(c, Arrays.asList(u1));
-        Purchase purchase2 = new Purchase(c, Arrays.asList(u2));
-        Purchase purchase3 = new Purchase(c, Arrays.asList(u3));
+        Purchase purchase1 = new Purchase(c);
+        p1.addToCart(purchase1, u1);
+        Purchase purchase2 = new Purchase(c);
+        p2.addToCart(purchase2, u2);
+        Purchase purchase3 = new Purchase(c);
+        p3.addToCart(purchase3, u3);
         
         assertEquals(3, c.getPurchases().size());
         assertTrue(c.getPurchases().contains(purchase1));
@@ -80,7 +83,8 @@ class PurchaseCustomerAssociationTest {
         Product p = new Product("iPhone", "Black", 999.0);
         Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
         
-        Purchase purchase = new Purchase(c1, Arrays.asList(u));
+        Purchase purchase = new Purchase(c1);
+        p.addToCart(purchase, u);
         
         // Purchase references c1
         assertEquals(c1, purchase.getCustomer());
@@ -104,8 +108,10 @@ class PurchaseCustomerAssociationTest {
         Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase purchase1 = new Purchase(c1, Arrays.asList(u1));
-        Purchase purchase2 = new Purchase(c2, Arrays.asList(u2));
+        Purchase purchase1 = new Purchase(c1);
+        p1.addToCart(purchase1, u1);
+        Purchase purchase2 = new Purchase(c2);
+        p2.addToCart(purchase2, u2);
         
         // Each customer has their own purchase
         assertEquals(1, c1.getPurchases().size());
@@ -133,7 +139,10 @@ class PurchaseCustomerAssociationTest {
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         Unit u3 = new Unit(LocalDate.of(2024, 1, 17), "SN003", p3);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(u1, u2, u3));
+        Purchase purchase = new Purchase(c);
+        p1.addToCart(purchase, u1);
+        p2.addToCart(purchase, u2);
+        p3.addToCart(purchase, u3);
         
         // Purchase is linked to customer once, even with multiple items
         assertEquals(1, c.getPurchases().size());
@@ -153,8 +162,10 @@ class PurchaseCustomerAssociationTest {
         Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase purchase1 = new Purchase(c, Arrays.asList(u1));
-        Purchase purchase2 = new Purchase(c, Arrays.asList(u2));
+        Purchase purchase1 = new Purchase(c);
+        p1.addToCart(purchase1, u1);
+        Purchase purchase2 = new Purchase(c);
+        p2.addToCart(purchase2, u2);
         
         assertEquals(2, c.getPurchases().size());
         assertEquals(2, Purchase.getExtent().size());
@@ -182,8 +193,10 @@ class PurchaseCustomerAssociationTest {
         Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase purchase1 = new Purchase(c, Arrays.asList(u1));
-        Purchase purchase2 = new Purchase(c, Arrays.asList(u2));
+        Purchase purchase1 = new Purchase(c);
+        p1.addToCart(purchase1, u1);
+        Purchase purchase2 = new Purchase(c);
+        p2.addToCart(purchase2, u2);
         
         // Verify both linked
         assertEquals(2, c.getPurchases().size());
@@ -209,11 +222,8 @@ class PurchaseCustomerAssociationTest {
     @Test
     @DisplayName("Should prevent null Customer in Purchase")
     void testNullCustomerRejected() {
-        Product p = new Product("iPhone", "Black", 999.0);
-        Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
-        
         assertThrows(IllegalArgumentException.class, 
-            () -> new Purchase(null, Arrays.asList(u)));
+            () -> new Purchase(null));
     }
 
     @Test
@@ -223,7 +233,8 @@ class PurchaseCustomerAssociationTest {
         Product p = new Product("iPhone", "Black", 999.0);
         Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
+        Purchase purchase = new Purchase(c);
+        p.addToCart(purchase, u);
         
         var purchases1 = c.getPurchases();
         var purchases2 = c.getPurchases();
@@ -250,8 +261,10 @@ class PurchaseCustomerAssociationTest {
         Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase purchase1 = new Purchase(c, Arrays.asList(u1));
-        Purchase purchase2 = new Purchase(c, Arrays.asList(u2));
+        Purchase purchase1 = new Purchase(c);
+        p1.addToCart(purchase1, u1);
+        Purchase purchase2 = new Purchase(c);
+        p2.addToCart(purchase2, u2);
         
         // Both purchases in extent
         assertTrue(Purchase.getExtent().contains(purchase1));
@@ -277,16 +290,20 @@ class PurchaseCustomerAssociationTest {
         Unit u3 = new Unit(LocalDate.of(2024, 1, 17), "SN003", p3);
         
         // c1 has 2 purchases
-        Purchase pu1 = new Purchase(c1, Arrays.asList(u1));
+        Purchase pu1 = new Purchase(c1);
+        p1.addToCart(pu1, u1);
         Product p4 = new Product("MacBook", "Silver", 1999.0);
         Unit u4 = new Unit(LocalDate.of(2024, 1, 18), "SN004", p4);
-        Purchase pu2 = new Purchase(c1, Arrays.asList(u4));
+        Purchase pu2 = new Purchase(c1);
+        p4.addToCart(pu2, u4);
         
         // c2 has 1 purchase
-        Purchase pu3 = new Purchase(c2, Arrays.asList(u2));
+        Purchase pu3 = new Purchase(c2);
+        p2.addToCart(pu3, u2);
         
         // c3 has 1 purchase
-        Purchase pu4 = new Purchase(c3, Arrays.asList(u3));
+        Purchase pu4 = new Purchase(c3);
+        p3.addToCart(pu4, u3);
         
         assertEquals(2, c1.getPurchases().size());
         assertEquals(1, c2.getPurchases().size());
@@ -304,8 +321,10 @@ class PurchaseCustomerAssociationTest {
         Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase purchase1 = new Purchase(c, Arrays.asList(u1));
-        Purchase purchase2 = new Purchase(c, Arrays.asList(u2));
+        Purchase purchase1 = new Purchase(c);
+        p1.addToCart(purchase1, u1);
+        Purchase purchase2 = new Purchase(c);
+        p2.addToCart(purchase2, u2);
         
         assertEquals(2, c.getPurchases().size());
         assertEquals(2, Purchase.getExtent().size());
@@ -329,7 +348,8 @@ class PurchaseCustomerAssociationTest {
         Product p = new Product("iPhone", "Black", 999.0);
         Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
+        Purchase purchase = new Purchase(c);
+        p.addToCart(purchase, u);
         
         // Purchase must have a customer
         assertEquals(c, purchase.getCustomer());
@@ -346,16 +366,15 @@ class PurchaseCustomerAssociationTest {
     @DisplayName("Should handle sequential unlinking and relinking")
     void testSequentialUnlinkingAndRelinking() {
         Customer c1 = new Customer("John", "Doe", LocalDate.of(1990, 1, 1), LocalDate.now());
-        Customer c2 = new Customer("Jane", "Smith", LocalDate.of(1995, 5, 15), LocalDate.now());
         
         Product p = new Product("iPhone", "Black", 999.0);
         Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
         
-        Purchase purchase = new Purchase(c1, Arrays.asList(u));
+        Purchase purchase = new Purchase(c1);
+        p.addToCart(purchase, u);
         
         // Initially linked to c1
         assertEquals(1, c1.getPurchases().size());
-        assertEquals(0, c2.getPurchases().size());
         
         // Delete from c1
         purchase.delete();
