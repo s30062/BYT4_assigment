@@ -43,7 +43,9 @@ class PurchaseTest {
         Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(u1, u2));
+        Purchase purchase = new Purchase(c);
+        p1.addToCart(purchase, u1);
+        p2.addToCart(purchase, u2);
         
         assertEquals(2, purchase.getItems().size());
         assertEquals(PurchaseStatus.Pending, purchase.getStatus());
@@ -60,7 +62,9 @@ class PurchaseTest {
         Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(u1, u2));
+        Purchase purchase = new Purchase(c);
+        p1.addToCart(purchase, u1);
+        p2.addToCart(purchase, u2);
         
         assertEquals(1198.0, purchase.getTotalPrice());
         
@@ -78,20 +82,16 @@ class PurchaseTest {
         
         // Null customer
         assertThrows(IllegalArgumentException.class, 
-            () -> new Purchase(null, Arrays.asList(u)));
-        
-        // Null items list
-        assertThrows(IllegalArgumentException.class, 
-            () -> new Purchase(c, null));
-        
-        // Empty items list
-        assertThrows(IllegalArgumentException.class, 
-            () -> new Purchase(c, Arrays.asList()));
+            () -> new Purchase(null));
         
         // Null status
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
+        Purchase purchase = new Purchase(c);
         assertThrows(IllegalArgumentException.class, 
             () -> purchase.setStatus(null));
+        
+        // Cannot finalize empty purchase
+        assertThrows(IllegalStateException.class,
+            () -> purchase.finalizePurchase());
     }
 
     @Test
@@ -104,10 +104,12 @@ class PurchaseTest {
         
         assertEquals(0, Purchase.getExtent().size());
         
-        Purchase pu1 = new Purchase(c, Arrays.asList(u1));
+        Purchase pu1 = new Purchase(c);
+        p.addToCart(pu1, u1);
         assertEquals(1, Purchase.getExtent().size());
         
-        Purchase pu2 = new Purchase(c, Arrays.asList(u2));
+        Purchase pu2 = new Purchase(c);
+        p.addToCart(pu2, u2);
         assertEquals(2, Purchase.getExtent().size());
         
         assertTrue(Purchase.getExtent().contains(pu1));
@@ -121,15 +123,17 @@ class PurchaseTest {
         Product p = new Product("iPhone", "Black", 999.0);
         Unit u = new Unit(LocalDate.of(2024, 1, 15), "SN001", p);
         
-        Purchase purchase = new Purchase(c, Arrays.asList(u));
+        Purchase purchase = new Purchase(c);
+        p.addToCart(purchase, u);
         
         var items1 = purchase.getItems();
         var items2 = purchase.getItems();
         
         assertNotSame(items1, items2);
         
-        // Try to modify returned list
-        assertThrows(UnsupportedOperationException.class, () -> items1.clear());
+        // Modifying returned list doesn't affect purchase's items
+        items1.clear();
+        assertEquals(1, purchase.getItems().size());
     }
 
     @Test
@@ -141,8 +145,10 @@ class PurchaseTest {
         Unit u1 = new Unit(LocalDate.of(2024, 1, 15), "SN001", p1);
         Unit u2 = new Unit(LocalDate.of(2024, 1, 16), "SN002", p2);
         
-        Purchase pu1 = new Purchase(c, Arrays.asList(u1));
-        Purchase pu2 = new Purchase(c, Arrays.asList(u2));
+        Purchase pu1 = new Purchase(c);
+        p1.addToCart(pu1, u1);
+        Purchase pu2 = new Purchase(c);
+        p2.addToCart(pu2, u2);
         
         Purchase.saveExtent();
         assertTrue(new File("purchase_extent.ser").exists());

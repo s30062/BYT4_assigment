@@ -14,11 +14,27 @@ public class Warranty implements Serializable {
     private static List<Warranty> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "warranty_extent.ser";
 
-    private final Purchase purchase;
-    private final Unit unit;
+    final Purchase purchase;
+    final Unit unit;
     private LocalDate endDate;
     private static int minimumPeriod = 1;
 
+    // Constructor for dummy warranties (added to cart with null endDate)
+    public Warranty(Purchase purchase, Unit unit) {
+        if (purchase == null) throw new IllegalArgumentException("purchase cannot be null");
+        if (unit == null) throw new IllegalArgumentException("unit cannot be null");
+        
+        this.purchase = purchase;
+        this.unit = unit;
+        this.endDate = null; // dummy warranty, endDate set later via setDateTo()
+        extent.add(this);
+        
+        // Establish bidirectional links with Purchase and Unit
+        purchase.linkWarranty(this);
+        unit.linkWarranty(this);
+    }
+
+    // Constructor for warranties with specified endDate (after purchase finalization)
     public Warranty(Purchase purchase, Unit unit, LocalDate endDate) {
         if (purchase == null) throw new IllegalArgumentException("purchase cannot be null");
         if (unit == null) throw new IllegalArgumentException("unit cannot be null");
@@ -34,15 +50,14 @@ public class Warranty implements Serializable {
         }
         if (yearsBetween > 10) throw new IllegalArgumentException("warranty period cannot exceed 10 years");
         
-        // Verify unit is in the purchase
-        if (!purchase.getItems().contains(unit)) {
-            throw new IllegalArgumentException("unit must be part of the purchase");
-        }
-        
         this.purchase = purchase;
         this.unit = unit;
         this.endDate = endDate;
         extent.add(this);
+        
+        // Establish bidirectional links with Purchase and Unit
+        purchase.linkWarranty(this);
+        unit.linkWarranty(this);
     }
 
     // derived
@@ -50,7 +65,27 @@ public class Warranty implements Serializable {
         return LocalDate.now().isEqual(getStartDate()) || (LocalDate.now().isAfter(getStartDate()) && LocalDate.now().isBefore(endDate));
     }
 
+    // Set endDate on a dummy warranty (endDate was null)
+    // Only works if warranty was created as dummy (endDate=null)
+    // and new endDate meets minimum period requirement
     public void setEndDate(LocalDate endDate) {
+        if (this.endDate != null) {
+            throw new IllegalStateException("Cannot modify endDate on a finalized warranty");
+        }
+        if (endDate == null) {
+            throw new IllegalArgumentException("endDate cannot be null");
+        }
+        
+        LocalDate startDate = purchase.getPurchaseDate().toLocalDate();
+        if (endDate.isBefore(startDate)) throw new IllegalArgumentException("end date cannot be before purchase date");
+        if (endDate.isEqual(startDate)) throw new IllegalArgumentException("end date cannot be the same as purchase date");
+        
+        int yearsBetween = Period.between(startDate, endDate).getYears();
+        if (yearsBetween < minimumPeriod) {
+            throw new IllegalArgumentException("warranty period must be at least " + minimumPeriod + " year(s)");
+        }
+        if (yearsBetween > 10) throw new IllegalArgumentException("warranty period cannot exceed 10 years");
+        
         this.endDate = endDate;
     }
 
@@ -83,6 +118,13 @@ public class Warranty implements Serializable {
     public Unit getUnit() { return unit; }
     public LocalDate getStartDate() { return purchase.getPurchaseDate().toLocalDate(); }
     public LocalDate getEndDate() { return endDate; }
+
+    // Delete this warranty and unlink from purchase and unit
+    public void delete() {
+        purchase.unlinkWarranty(this);
+        unit.unlinkWarranty(this);
+        extent.remove(this);
+    }
 
 
     public static List<Warranty> getExtent() { return new ArrayList<>(extent); }
