@@ -1,7 +1,11 @@
 package com.byt.s30062.model;
 
+import com.byt.s30062.model.enums.DayOfWeek;
 import com.byt.s30062.model.enums.LevelOfPermission;
+import com.byt.s30062.model.enums.StaffType;
+import com.byt.s30062.model.complex.WorkingHours;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 public class Administrator extends Staff {
@@ -9,10 +13,31 @@ public class Administrator extends Staff {
     private LevelOfPermission levelOfPermission;
 
     public Administrator(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary, 
-                        boolean isIntern, LevelOfPermission levelOfPermission) {
-        super(firstName, lastName, dateOfBirth, baseSalary, isIntern);
+                        boolean isIntern, LevelOfPermission levelOfPermission, StaffType staffType, List<DayOfWeek> weekends) {
+        super(firstName, lastName, dateOfBirth, baseSalary, isIntern, staffType, weekends);
         if (levelOfPermission == null) throw new IllegalArgumentException("levelOfPermission cannot be null");
-        
+        this.levelOfPermission = levelOfPermission;
+    }
+
+    public Administrator(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary, 
+                        boolean isIntern, LevelOfPermission levelOfPermission, StaffType staffType, 
+                        List<DayOfWeek> workingDays, WorkingHours workingHours) {
+        super(firstName, lastName, dateOfBirth, baseSalary, isIntern, staffType, workingDays, workingHours);
+        if (levelOfPermission == null) throw new IllegalArgumentException("levelOfPermission cannot be null");
+        this.levelOfPermission = levelOfPermission;
+    }
+
+    public Administrator(Person person, double baseSalary, boolean isIntern, LevelOfPermission levelOfPermission, 
+                        StaffType staffType, List<DayOfWeek> weekends) {
+        super(person, baseSalary, isIntern, staffType, weekends);
+        if (levelOfPermission == null) throw new IllegalArgumentException("levelOfPermission cannot be null");
+        this.levelOfPermission = levelOfPermission;
+    }
+
+    public Administrator(Person person, double baseSalary, boolean isIntern, LevelOfPermission levelOfPermission, 
+                        StaffType staffType, List<DayOfWeek> workingDays, WorkingHours workingHours) {
+        super(person, baseSalary, isIntern, staffType, workingDays, workingHours);
+        if (levelOfPermission == null) throw new IllegalArgumentException("levelOfPermission cannot be null");
         this.levelOfPermission = levelOfPermission;
     }
 

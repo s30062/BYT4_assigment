@@ -9,16 +9,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public class Customer extends Person {
+public class Customer implements Serializable {
     private static final long serialVersionUID = 1L;
     private static List<Customer> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "customer_extent.ser";
 
+    private final Person person; // Composed Person (required)
     private final LocalDate registrationDate; // basic attribute
     private List<Purchase> purchases = new ArrayList<>(); // 0..many purchases for this customer
 
+    // Constructor 1: Create Customer with new Person
     public Customer(String firstName, String lastName, LocalDate dateOfBirth, LocalDate registrationDate) {
-        super(firstName, lastName, dateOfBirth);
+        // Create and link a new Person
+        Person newPerson = new Person(firstName, lastName, dateOfBirth);
+        this.person = newPerson;
         
         if (registrationDate == null) throw new IllegalArgumentException("registration date cannot be null");
         if (registrationDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("registration date cannot be in the future");
@@ -28,8 +32,44 @@ public class Customer extends Person {
         if (age < 13) throw new IllegalArgumentException("customer must be at least 13 years old");
         
         this.registrationDate = registrationDate;
+        
+        // Bidirectional link
+        newPerson.linkCustomer(this);
         extent.add(this);
     }
+
+    // Constructor 2: Create Customer with existing Person
+    public Customer(Person person, LocalDate registrationDate) {
+        if (person == null) throw new IllegalArgumentException("person cannot be null");
+        if (registrationDate == null) throw new IllegalArgumentException("registration date cannot be null");
+        if (registrationDate.isAfter(LocalDate.now())) throw new IllegalArgumentException("registration date cannot be in the future");
+        if (registrationDate.isBefore(person.getDateOfBirth())) throw new IllegalArgumentException("registration date cannot be before birth date");
+        
+        int age = LocalDate.now().getYear() - person.getDateOfBirth().getYear();
+        if (age < 13) throw new IllegalArgumentException("customer must be at least 13 years old");
+        
+        this.person = person;
+        this.registrationDate = registrationDate;
+        
+        // Bidirectional link
+        person.linkCustomer(this);
+        extent.add(this);
+    }
+
+    // Person delegation methods
+    public Person getPerson() { return person; }
+
+    public String getFirstName() { return person.getFirstName(); }
+
+    public String getLastName() { return person.getLastName(); }
+
+    public LocalDate getDateOfBirth() { return person.getDateOfBirth(); }
+
+    public int getAge() { return person.getAge(); }
+
+    public void setFirstName(String firstName) { person.setFirstName(firstName); }
+
+    public void setLastName(String lastName) { person.setLastName(lastName); }
 
     public LocalDate getRegistrationDate() { return registrationDate; }
 
@@ -78,11 +118,11 @@ public class Customer extends Person {
         if (this == o) return true;
         if (!(o instanceof Customer)) return false;
         Customer c = (Customer) o;
-        return getFirstName().equals(c.getFirstName()) && getLastName().equals(c.getLastName()) && getDateOfBirth().isEqual(c.getDateOfBirth());
+        return person.equals(c.person) && registrationDate.isEqual(c.registrationDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getFirstName(), getLastName(), getDateOfBirth());
+        return Objects.hash(person, registrationDate);
     }
 }
