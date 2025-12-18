@@ -1,5 +1,9 @@
 package com.byt.s30062.model;
 
+import com.byt.s30062.model.enums.DayOfWeek;
+import com.byt.s30062.model.enums.StaffType;
+import com.byt.s30062.model.complex.WorkingHours;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +11,14 @@ import java.util.List;
 public class Manager extends Staff {
     private List<Report> reports = new ArrayList<>(); // 0..many reports for this manager
 
-    public Manager(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary, boolean isIntern) {
-        super(firstName, lastName, dateOfBirth, baseSalary, isIntern);
+    public Manager(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary,
+                   boolean isIntern, StaffType staffType, List<DayOfWeek> weekends) {
+        super(firstName, lastName, dateOfBirth, baseSalary, isIntern, staffType, weekends);
+    }
+
+    public Manager(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary,
+                   boolean isIntern, StaffType staffType, List<DayOfWeek> workingDays, WorkingHours workingHours) {
+        super(firstName, lastName, dateOfBirth, baseSalary, isIntern, staffType, workingDays, workingHours);
     }
 
     public List<Report> getReports() {
