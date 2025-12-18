@@ -27,6 +27,20 @@ public class Administrator extends Staff {
         this.levelOfPermission = levelOfPermission;
     }
 
+    public Administrator(Person person, double baseSalary, boolean isIntern, LevelOfPermission levelOfPermission, 
+                        StaffType staffType, List<DayOfWeek> weekends) {
+        super(person, baseSalary, isIntern, staffType, weekends);
+        if (levelOfPermission == null) throw new IllegalArgumentException("levelOfPermission cannot be null");
+        this.levelOfPermission = levelOfPermission;
+    }
+
+    public Administrator(Person person, double baseSalary, boolean isIntern, LevelOfPermission levelOfPermission, 
+                        StaffType staffType, List<DayOfWeek> workingDays, WorkingHours workingHours) {
+        super(person, baseSalary, isIntern, staffType, workingDays, workingHours);
+        if (levelOfPermission == null) throw new IllegalArgumentException("levelOfPermission cannot be null");
+        this.levelOfPermission = levelOfPermission;
+    }
+
     public LevelOfPermission getLevelOfPermission() { return levelOfPermission; }
 
     public void setLevelOfPermission(LevelOfPermission levelOfPermission) {

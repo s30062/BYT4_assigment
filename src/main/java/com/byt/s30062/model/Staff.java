@@ -15,11 +15,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public abstract class Staff extends Person {
+public abstract class Staff implements Serializable {
     private static final long serialVersionUID = 1L;
     private static List<Staff> extent = new ArrayList<>();
     private static final String EXTENT_FILE = "staff_extent.ser";
 
+    protected Person person; // Composed Person (required)
     private double baseSalary;
     private boolean isIntern;
     private StaffType staffType; // FULL_TIME or PART_TIME (required)
@@ -38,10 +39,11 @@ public abstract class Staff extends Person {
     private Staff supervisedBy; // nullable; only set for interns
     private List<Staff> supervises = new ArrayList<>(); // non-intern can supervise many interns
 
-    // Protected constructor for FULL_TIME staff
+    // Protected constructor for FULL_TIME staff with new Person
     protected Staff(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary,
                     boolean isIntern, StaffType staffType, List<DayOfWeek> weekends) {
-        super(firstName, lastName, dateOfBirth);
+        Person newPerson = new Person(firstName, lastName, dateOfBirth);
+        this.person = newPerson;
         validateBaseSalary(baseSalary);
         if (staffType != StaffType.FULL_TIME) {
             throw new IllegalArgumentException("This constructor is for FULL_TIME staff only");
@@ -51,13 +53,16 @@ public abstract class Staff extends Person {
         this.isIntern = isIntern;
         this.staffType = staffType;
         this.weekends = new ArrayList<>(weekends);
+        // Bidirectional link
+        newPerson.linkStaff(this);
         extent.add(this);
     }
 
-    // Protected constructor for PART_TIME staff
+    // Protected constructor for PART_TIME staff with new Person
     protected Staff(String firstName, String lastName, LocalDate dateOfBirth, double baseSalary,
                     boolean isIntern, StaffType staffType, List<DayOfWeek> workingDays, WorkingHours workingHours) {
-        super(firstName, lastName, dateOfBirth);
+        Person newPerson = new Person(firstName, lastName, dateOfBirth);
+        this.person = newPerson;
         validateBaseSalary(baseSalary);
         if (staffType != StaffType.PART_TIME) {
             throw new IllegalArgumentException("This constructor is for PART_TIME staff only");
@@ -69,6 +74,46 @@ public abstract class Staff extends Person {
         this.staffType = staffType;
         this.workingDays = new ArrayList<>(workingDays);
         this.workingHours = workingHours;
+        // Bidirectional link
+        newPerson.linkStaff(this);
+        extent.add(this);
+    }
+
+    // Protected constructor for FULL_TIME staff with existing Person
+    protected Staff(Person person, double baseSalary, boolean isIntern, StaffType staffType, List<DayOfWeek> weekends) {
+        if (person == null) throw new IllegalArgumentException("person cannot be null");
+        this.person = person;
+        validateBaseSalary(baseSalary);
+        if (staffType != StaffType.FULL_TIME) {
+            throw new IllegalArgumentException("This constructor is for FULL_TIME staff only");
+        }
+        validateWeekends(weekends);
+        this.baseSalary = baseSalary;
+        this.isIntern = isIntern;
+        this.staffType = staffType;
+        this.weekends = new ArrayList<>(weekends);
+        // Bidirectional link
+        person.linkStaff(this);
+        extent.add(this);
+    }
+
+    // Protected constructor for PART_TIME staff with existing Person
+    protected Staff(Person person, double baseSalary, boolean isIntern, StaffType staffType, List<DayOfWeek> workingDays, WorkingHours workingHours) {
+        if (person == null) throw new IllegalArgumentException("person cannot be null");
+        this.person = person;
+        validateBaseSalary(baseSalary);
+        if (staffType != StaffType.PART_TIME) {
+            throw new IllegalArgumentException("This constructor is for PART_TIME staff only");
+        }
+        validateWorkingDays(workingDays);
+        if (workingHours == null) throw new IllegalArgumentException("workingHours cannot be null");
+        this.baseSalary = baseSalary;
+        this.isIntern = isIntern;
+        this.staffType = staffType;
+        this.workingDays = new ArrayList<>(workingDays);
+        this.workingHours = workingHours;
+        // Bidirectional link
+        person.linkStaff(this);
         extent.add(this);
     }
 
@@ -96,6 +141,21 @@ public abstract class Staff extends Person {
         Set<DayOfWeek> uniqueDays = new HashSet<>(workingDays);
         if (uniqueDays.size() != workingDays.size()) throw new IllegalArgumentException("workingDays cannot contain duplicate days");
     }
+
+    // Person delegation methods
+    public Person getPerson() { return person; }
+
+    public String getFirstName() { return person.getFirstName(); }
+
+    public String getLastName() { return person.getLastName(); }
+
+    public LocalDate getDateOfBirth() { return person.getDateOfBirth(); }
+
+    public int getAge() { return person.getAge(); }
+
+    public void setFirstName(String firstName) { person.setFirstName(firstName); }
+
+    public void setLastName(String lastName) { person.setLastName(lastName); }
 
     public StaffType getStaffType() { return staffType; }
 
@@ -254,7 +314,7 @@ public abstract class Staff extends Person {
         if (this == o) return true;
         if (!(o instanceof Staff)) return false;
         Staff s = (Staff) o;
-        if (!super.equals(o) || baseSalary != s.getBaseSalary()) return false;
+        if (!person.equals(s.person) || baseSalary != s.getBaseSalary()) return false;
         if (!Objects.equals(staffType, s.staffType)) return false;
         if (staffType == StaffType.FULL_TIME) {
             return weekends != null && s.weekends != null && new HashSet<>(weekends).equals(new HashSet<>(s.weekends));
@@ -269,7 +329,7 @@ public abstract class Staff extends Person {
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(super.hashCode(), baseSalary, staffType);
+        int hash = Objects.hash(person, baseSalary, staffType);
         if (staffType == StaffType.FULL_TIME && weekends != null) {
             hash = Objects.hash(hash, new HashSet<>(weekends));
         } else if (staffType == StaffType.PART_TIME && workingDays != null) {

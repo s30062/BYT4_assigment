@@ -21,6 +21,14 @@ public class Manager extends Staff {
         super(firstName, lastName, dateOfBirth, baseSalary, isIntern, staffType, workingDays, workingHours);
     }
 
+    public Manager(Person person, double baseSalary, boolean isIntern, StaffType staffType, List<DayOfWeek> weekends) {
+        super(person, baseSalary, isIntern, staffType, weekends);
+    }
+
+    public Manager(Person person, double baseSalary, boolean isIntern, StaffType staffType, List<DayOfWeek> workingDays, WorkingHours workingHours) {
+        super(person, baseSalary, isIntern, staffType, workingDays, workingHours);
+    }
+
     public List<Report> getReports() {
         return new ArrayList<>(reports);
     }

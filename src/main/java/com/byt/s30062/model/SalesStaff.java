@@ -26,6 +26,20 @@ public class SalesStaff extends Staff {
         this.salesBonus = salesBonus;
     }
 
+    public SalesStaff(Person person, double baseSalary, boolean isIntern, double salesBonus, 
+                     StaffType staffType, List<DayOfWeek> weekends) {
+        super(person, baseSalary, isIntern, staffType, weekends);
+        validateSalesBonus(salesBonus);
+        this.salesBonus = salesBonus;
+    }
+
+    public SalesStaff(Person person, double baseSalary, boolean isIntern, double salesBonus, 
+                     StaffType staffType, List<DayOfWeek> workingDays, WorkingHours workingHours) {
+        super(person, baseSalary, isIntern, staffType, workingDays, workingHours);
+        validateSalesBonus(salesBonus);
+        this.salesBonus = salesBonus;
+    }
+
     private static void validateSalesBonus(double salesBonus) {
         if (salesBonus < 0) throw new IllegalArgumentException("salesBonus cannot be negative");
         if (Double.isNaN(salesBonus)) throw new IllegalArgumentException("salesBonus cannot be NaN");
